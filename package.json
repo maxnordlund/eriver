@@ -5,6 +5,16 @@
   "main": "app",
   "author": "Hyper Bream (http://example.com)",
   "contributors": [
+    "Andreas Broström   <abros@kth.se>",
+    "Johan Fogelström   <johfog@kth.se>",
+    "Simon Johansson    <simj@kth.se>",
+    "David Karlbom      <dkarlbom@kth.se>",
+    "Daniel Langesten   <langest@kth.se>",
+    "Max Nordlund       <maxno@kth.se>",
+    "Oskar Segersvärd   <oskarseg@kth.se>",
+    "Thomas Sjöholm     <thsj@kth.se>",
+    "Malin Larsson      <malin.larsson@student.berghs.se>",
+    "Philip Bratt       <bratt.philip@gmail.com>"
   ],
   "dependencies": {
     "coffee-script": "1.4.x",
