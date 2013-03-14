@@ -5,6 +5,7 @@ startCal      2   angle: <float64>
 addPoint      3   x: <float64> y: <float64>
 clear         4   (nothing)
 endCal        5   (nothing)
+unavailible   6   (nothing)
 
 cmd är en unsigned byte (0-255)
 

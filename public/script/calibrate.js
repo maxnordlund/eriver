@@ -105,6 +105,10 @@ $(function() {
 		$('#prepare').show();
 	});
 
+	socket.on('started', function() {
+		return;
+	}
+
 	socket.on('disconnect', function() {
 		$(orb.dom).hide();
 		$('.popup').hide();
