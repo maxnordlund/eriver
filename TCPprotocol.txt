@@ -1,0 +1,14 @@
+meaining    cmd   params
+
+getPoint      1   x: <float64> y: <float64> time: <int64>
+startCal      2   angle: <float64>
+addPoint      3   x: <float64> y: <float64>
+clear         4   (nothing)
+endCal        5   (nothing)
+
+cmd är en unsigned byte (0-255)
+
+getPoint med x,y,time nollfyllda är en getStream
+  Första gången getPoint skickas initierar den strömmen och andra gången så avslutar den strömmer
+
+// time är en signed long (int64)
