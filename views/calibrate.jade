@@ -1,0 +1,31 @@
+!!! 5
+html
+  head
+    meta(name='charset', content='utf-8')
+    title Calibrate ET
+    link(rel='stylesheet', type='text/css', href='calibrate.css')
+    link(href='http://fonts.googleapis.com/css?family=Iceland:400,700', rel='stylesheet', type='text/css')
+    script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js')
+    script(src='/socket.io/socket.io.js')
+  body
+    // a(id='back', href='/') Back
+    #connecting.popup
+      img.logo(src='eriver_logo.png', height='70px')
+      h2 Connecting to server.
+      img(src='ajax-loader.gif')
+    #prepare.popup(style='display: none;')
+      img.logo(src='eriver_logo.png', height='70px')
+      h2 Prepare to calibrate.
+      label
+        | Angle:
+        input(type='number', value='45', id='angle')
+        | deg
+      input(type='button', value='Calibrate')
+    #retry.popup(style='display: none;')
+      h2 Calibration failed.
+      input(type='button', value='Retry')
+    #complete.popup(style='display: none;')
+      h2 Calibration completed.
+      div(class='errorsize')
+      div(class='errortext')
+    script(src='calibrate.js')
