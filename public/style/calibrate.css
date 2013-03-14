@@ -1,0 +1,140 @@
+body {
+	background-color: black;
+	margin: 0;
+	height: 100%;
+	font-family: "Iceland","Tahoma","Verdana","Arial","sans-serif";
+}
+
+a {
+	background-color: #066;
+	color: white;
+	font-size: 24px;
+	padding: 5px 25px 5px 20px;
+	line-height: 25px;
+	text-decoration: none;
+	border-bottom-right-radius: 20px 55px;
+	border-right: 1px solid #399;
+	border-bottom: 1px solid #399;
+	box-shadow: 0 0 15px #0ff;
+}
+
+a:hover {
+	background-color: #077;
+	box-shadow: 0 0 25px #0ff;
+}
+
+.popup {
+	position: relative;
+	padding: 15px;
+	border-radius: 15px;
+	width: 300px;
+	top: 200px;
+	margin: -65px auto 0 auto;
+	background-color: white;
+	text-align: center;
+	border: 1px solid #555;
+	box-shadow: 0 0 35px white;
+}
+
+.popup .logo {
+	background-image: radial-gradient(gray, transparent 70%);
+	background-image: -webkit-radial-gradient(gray, transparent 70%);
+}
+
+.popup h2 {
+	margin: 10px 0 20px 0;
+	font-weight: normal;
+	font-size: 30px;
+	color: #555;
+}
+
+.popup .errorsize {
+	border-radius: 50%;
+	border: 1px solid;
+	border-color: #066;
+	margin: 20px auto 10px auto;
+}
+
+.popup label {
+	display: block;
+}
+
+.popup input[type="number"] {
+	margin: 0 0 20px 10px;
+	width: 40px;
+}
+
+.popup input[type="button"] {
+	border: 1px solid white;
+	background-color: #088;
+	color: white;
+	font-family: "Iceland","Tahoma","Verdana","Arial","sans-serif";
+	padding: 5px 15px;
+	font-size: 24px;
+	border-radius: 5px;
+	box-shadow: 0 0 5px #066;
+}
+
+.popup input[type="button"]:hover {
+	background-color: #099;
+	box-shadow: 0 0 15px #088;
+}
+
+.popup input[type="button"]:active {
+	background-color: #033;
+	box-shadow: 0 0 15px #033;
+}
+
+.orb {
+	position: absolute;
+	margin: -50px 0 0 -50px;
+	width: 100px;
+	height: 100px;
+	
+	transition: all 0.5s;
+	-webkit-transition: all 0.5s;
+	-moz-transition: all 0.5s;
+}
+
+.orb div {
+	content: "";
+	position: absolute;
+	width: 100px;
+	height: 100px;
+	border-radius: 50%;
+	/*
+	background-color: red;
+	background-image: radial-gradient(red, rgb(0, 50, 50));
+	background-image: -webkit-radial-gradient(red, rgb(0, 50, 50));
+	background-image: -moz-radial-gradient(red, rgb(0, 50, 50));
+	*/
+	background-image: url(/img/davido.png);
+	background-size: cover;
+}
+
+@keyframes flex {
+  from {
+    transform: scale(1.0);
+  }
+  to {
+    transform: scale(0.3);
+  }
+}
+
+@-webkit-keyframes flex {
+  from {
+    -webkit-transform: scale(1.0);
+  }
+  to {
+    -webkit-transform: scale(0.3);
+  }
+}
+
+@-moz-keyframes flex {
+  from {
+    -moz-transform: scale(1.0);
+  }
+  to {
+    -moz-transform: scale(0.3);
+  }
+}
