@@ -105,10 +105,6 @@ $(function() {
 		$('#prepare').show();
 	});
 
-	socket.on('started', function() {
-		return;
-	}
-
 	socket.on('disconnect', function() {
 		$(orb.dom).hide();
 		$('.popup').hide();
@@ -130,7 +126,10 @@ $(function() {
 		if (ready) {
 			e.stopPropagation();
 			$(this).parent().hide();
-			calibrate();
+
+			socket.emit('startCal', {angle: parseFloat($('#angle').attr('value'))});
+		
+			socket.on('startCal', calibrate);
 		}
 	});
 	
@@ -140,7 +139,6 @@ $(function() {
 		var moveWait = 1000;
 		var extra = 0;
 
-		socket.emit('startCal', {angle: parseFloat($('#angle').attr('value'))});
 		
 		var totalTime = moveWait + flexWait + extra;
 
