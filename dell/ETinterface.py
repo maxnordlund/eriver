@@ -20,6 +20,9 @@ class EyeTracker(object):
     def addPoint(self, x, y):
         raise NotImplementedError
 
+    def getName(self):
+        return "Eye Tracker"
+
 class ETError(RuntimeError):
 
 
