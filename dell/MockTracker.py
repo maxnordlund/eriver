@@ -1,17 +1,37 @@
-from multiprocessing import Process, Pipe
+from multiprocessing import Process
 
+#Fake eye tracker that gives points in a circle.
+#Thinking about making the calibration set up a polygon that is traced instead.
 class MockTracker(EyeTracker, Process):
-    def __init__(self):
-        self.sendEvent=False
+    def __init__(self, name="MockTracker"):
+        self.active=False
+        self.calibrating=False
+        self.name=name
         self.start()
 
-    def enable(yes=True):
-        self.sendEvent=yes
+    def enable(self, yes=True):
+        self.active = yes
 
-    def getState():
-        return 1
+    def getState(self):
+        return 0 + self.active + (self.calibrating << 1)
 
-    def run():
+    def startCalibration(self):
+        self.calibrating=True
+
+    def endCalibration(self):
+        self.calibrating=False
+
+    def clearCalibration(self):
+        pass
+
+    def addPoint(self, x, y):
+        pass
+
+    def getName(self):
+        return self.name
+        
+
+    def run(self):
         for event in circle_generator(radius=0.2, offset=(0.5, 0.5)):
             if self.sendEvent:
                 self.onETEvent(event)
