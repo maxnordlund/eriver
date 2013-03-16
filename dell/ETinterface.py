@@ -5,19 +5,19 @@ class EyeTracker(object):
     def enable(yes=True):
         raise NotImplementedError
 
-    def getState():
+    def getState(self):
         raise NotImplementedError
 
-    def startCalibration():
+    def startCalibration(self):
         raise NotImplementedError
 
-    def endCalibration():
+    def endCalibration(self):
         raise NotImplementedError
 
-    def clearCalibration():
+    def clearCalibration(self):
         raise NotImplementedError
 
-    def addPoint(x, y):
+    def addPoint(self, x, y):
         raise NotImplementedError
 
 class ETError(RuntimeError):
