@@ -1,6 +1,100 @@
+from network import TCPHandler
+from socket import error
+from threading import Thread
+import struct
+
+shutdown = False
+handlers = dict()
+name = 1
+
+def enum(**enums):
+    return type('Enum', (), enums)
+
+cmds = enum("GETPOINT"=1, "STARTCAL"=2, "ADDPOINT"=3, "CLEAR"=4, "ENDCAL"=5, "UNAVALIABLE"=6, "NAME"=7, "OST"=8, "TEAPOT"=9)
+lengths = enum('COMMAND'=1, 'GETPOINT'=24, 'STARTCAL'=8, 'ADDPOINT'=16, 'NAME'=1, 'OST'=4, 'TEAPOT'=1)
+
+class ConnHandler(Thread):
+
+    # Panic method.
+    # If an error is found on the network, call this and let it handle it "gracefully".
+    def panic(self):
+        global handlers
+
+        del handlers[self]
+        self.stop = True
+
+    # Sends a signal to the other side, that the command they attempted to use is unavailiable at this time.
+    # Panics if error if found on send.
+    def unavaliable(self):
+        try:
+            self.conn.send(struct.pack("!2B", cmds.NAME, name))
+        except error:
+            self.panic()
+    
+    def __init__(self, conn, addr):
+        global cmds
+        
+        self.conn = conn
+        self.addr = addr
+        self.listen = False
+        self.stop = False
+
+        self.protocol = dict() #TODO Fill with functions for great justice.
+
+    def __hash__(self):
+        return hash(self.addr)
+
+    def run(self):
+        global name
+        global cmds
+        global lengths
+        global shutdown
+        
+        self.conn.send(struct.pack("!2B", cmds.NAME, name))
+        while not self.stop or not shutdown:
+            try:
+                data = self.conn.read(lengths.COMMAND)
+            except error:
+                self.panic()
+                
+            if len(data) < lengths.COMMAND:
+               continue
+            command = struct.unpack("!B", data)[0]
+            self.protocol.get(command, unavailiable)()
 
 def startServer(addr):
-    pass
+    global shutdown #Use the global shutdown variable
+    global handlers #And the global map of handlers
+    
+    serverSocket = TCPHandler(addr, False, True) # Create a server socket for listening to connection attempts
+    with serverSocket: # Make sure it is closed!
+        while not shutdown: #Loop until we recive signal of shutdown
+            try:
+                conn, addr = serverSocket.accept()
+            except:
+                global handlers
+                shutdown = True
+                for h in handlers:
+                    h.join()
+                    
+            h = ConnHandler(conn, addr)
+            handlers[h] = True
+            h.start()
+
+        
 
 if __name__ == "__main__":
-    startServer(("0.0.0.0", 3031))
+    addr = ("0.0.0.0", 3031)
+    print("HAI\n")
+    print("CAN HAS NETWORK?\n")
+    print("PLZ OPEN TCP " + str(addr) + " PLS?\n")
+    print("\tAWSUM THX\n")
+    print("\t\tLISTEN 2 TCP\n")
+    print("\t\t\tDO_STUFFS!\n")
+    print("\tO NOES\n")
+    print("\t\tPANIC!\n")
+    startServer(addr)
+    print("KTHXBYE!\n")
+
+
+    
