@@ -2,6 +2,7 @@ from network import TCPHandler
 from socket import error
 from threading import Thread
 import struct
+import datetime
 
 shutdown = False
 handlers = dict()
@@ -10,8 +11,8 @@ name = 1
 def enum(**enums):
     return type('Enum', (), enums)
 
-cmds = enum("GETPOINT"=1, "STARTCAL"=2, "ADDPOINT"=3, "CLEAR"=4, "ENDCAL"=5, "UNAVALIABLE"=6, "NAME"=7, "OST"=8, "TEAPOT"=9)
-lengths = enum('COMMAND'=1, 'GETPOINT'=24, 'STARTCAL'=8, 'ADDPOINT'=16, 'NAME'=1, 'OST'=4, 'TEAPOT'=1)
+cmds = enum(GETPOINT=1, STARTCAL=2, ADDPOINT=3, CLEAR=4, ENDCAL=5, UNAVALIABLE=6, NAME=7, OST=8, TEAPOT=9)
+lengths = enum(COMMAND=1, GETPOINT=24, STARTCAL=8, ADDPOINT=16, NAME=1, OST=4, TEAPOT=1)
 
 class ConnHandler(Thread):
 
@@ -84,17 +85,39 @@ def startServer(addr):
         
 
 if __name__ == "__main__":
+
+    import sys, traceback
+    
     addr = ("0.0.0.0", 3031)
     print("HAI\n")
     print("CAN HAS NETWORK?\n")
-    print("PLZ OPEN TCP " + str(addr) + " PLS?\n")
+    print("PLZ LISTEN 2 TCP " + str(addr) + "?\n")
     print("\tAWSUM THX\n")
-    print("\t\tLISTEN 2 TCP\n")
-    print("\t\t\tDO_STUFFS!\n")
-    print("\tO NOES\n")
-    print("\t\tPANIC!\n")
-    startServer(addr)
-    print("KTHXBYE!\n")
+    print("\t\tDO_STUFFS!\n")
+    try:
+        startServer(addr)
+
+    except:
+        print("\tO NOES\n")
+        print("\t\tPANIC!\n")
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        print("\t\tLOOKZ! KITTY!")
+        try:
+            with open("stderr.out", "a") as f:
+                f.write("KITTY! IT HID " + datetime.datetime.now().isoformat(' ') + "\n")
+                traceback.print_exception(exc_type, exc_value, exc_traceback,
+                                  limit=5, file=f)
+                f.write("\n\n")
+                print("\t\tAWWW.. IT HID IN BOX " + f.name)
+        
+        except:
+            traceback.print_exception(exc_type, exc_value, exc_traceback,
+                              limit=5, file=f)
+            print("\t\tAWWW.. IT WANTED TO PLAY...")
+        
+        
+    finally:
+        print("KTHXBYE!\n")
 
 
     
