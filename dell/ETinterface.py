@@ -23,11 +23,18 @@ class EyeTracker(object):
     def getName(self):
         return "Eye Tracker"
 
-class ETError(RuntimeError):
+class ETError(Exception):
+
+    def __init__(self, code, text):
+        self.code = code
+        self.text = text
+
+    def __str__(self):
+        return "ETError! Error code %d: %s" % (self.code, self.text)
 
 
 class ETEvent(object):
-    __init__(self, x, y, timestamp):
+    def __init__(self, x, y, timestamp):
         self.x=x
         self.y=y
         self.time=timestamp
