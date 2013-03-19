@@ -28,7 +28,7 @@ class ConnHandler(Thread):
     # Panics if error if found on send.
     def unavaliable(self):
         try:
-            self.conn.send(struct.pack("!2B", cmds.NAME, name))
+            self.conn.send(struct.pack("!B", cmds.UNAVALIABLE))
         except error:
             self.panic()
     
@@ -42,6 +42,8 @@ class ConnHandler(Thread):
 
         self.protocol = dict() #TODO Fill with functions for great justice.
 
+        Thread.__init__(self)
+
     def __hash__(self):
         return hash(self.addr)
 
@@ -54,34 +56,38 @@ class ConnHandler(Thread):
         self.conn.send(struct.pack("!2B", cmds.NAME, name))
         while not self.stop or not shutdown:
             try:
-                data = self.conn.read(lengths.COMMAND)
+                data = self.conn.recieve(lengths.COMMAND)
             except error:
                 self.panic()
                 
             if len(data) < lengths.COMMAND:
                continue
             command = struct.unpack("!B", data)[0]
-            self.protocol.get(command, unavailiable)()
+            self.protocol.get(command, self.unavaliable)()
 
 def startServer(addr):
     global shutdown #Use the global shutdown variable
     global handlers #And the global map of handlers
     
-    serverSocket = TCPHandler(addr, False, True) # Create a server socket for listening to connection attempts
+    serverSocket = TCPHandler(addr, None, True) # Create a server socket for listening to connection attempts
     with serverSocket: # Make sure it is closed!
         while not shutdown: #Loop until we recive signal of shutdown
             try:
-                conn, addr = serverSocket.accept()
-            except:
-                global handlers
-                shutdown = True
+                conn, addr = serverSocket.accept() #Blockingly accept connections
+                print("FRIEND! AWSUM THX!\n")
+                h = ConnHandler(conn, addr) #Take new connection and fork off a handler
+                handlers[h] = True #Put it in dictionary for safe storage.
+                h.start() #And kick it away!
+            except (error, KeyboardInterrupt) as e:
+                shutdown = True #O NOES!
                 for h in handlers:
-                    h.join()
-                    
-            h = ConnHandler(conn, addr)
-            handlers[h] = True
-            h.start()
+                    h.join() #CAN I HAS SYNCZ?
 
+                if isinstance(e, error):
+                    raise
+            
+
+    print("\tPLZ CLOSE EVERYTHING!")
         
 
 if __name__ == "__main__":
@@ -90,7 +96,7 @@ if __name__ == "__main__":
     
     addr = ("0.0.0.0", 3031)
     print("HAI\n")
-    print("CAN HAS NETWORK?\n")
+    print("CAN I HAS NETWORK?\n")
     print("PLZ LISTEN 2 TCP " + str(addr) + "?\n")
     print("\tAWSUM THX\n")
     print("\t\tDO_STUFFS!\n")
@@ -112,7 +118,7 @@ if __name__ == "__main__":
         
         except:
             traceback.print_exception(exc_type, exc_value, exc_traceback,
-                              limit=5, file=f)
+                              limit=5)
             print("\t\tAWWW.. IT WANTED TO PLAY...")
         
         
