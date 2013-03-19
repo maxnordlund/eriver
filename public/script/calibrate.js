@@ -46,7 +46,6 @@ $(function() {
 	};
 	
 	/* Mock-Socket.io-socket */
-	console.log(window.io);
 	if (typeof window.io !== 'object') {
 		function Socket() {
 			var _this = this;
@@ -98,7 +97,6 @@ $(function() {
 		{x:0.1, y:0.9}];
 	
 	var socket = io.connect(location.protocol+'//'+location.host);
-	console.log(socket);
 
 	socket.on('connect', function() {
 		$('.popup').hide();
@@ -107,8 +105,12 @@ $(function() {
 
 	socket.on('disconnect', function() {
 		$(orb.dom).hide();
+		orb.moveTo(-0.1, 0.1);
 		$('.popup').hide();
-		$('#retry').show();
+		var popup = $('#connecting');
+		popup.find('h2').css('color', 'red').text('Reconnecting...');
+		popup.show();
+
 	});
 
 	socket.on('getPoint', function(point) {
@@ -118,7 +120,6 @@ $(function() {
 		$('.errorsize').show();
 		$('.errorsize').css('width', err+'px').css('height', err+'px');
 		$('.errortext').text(str);
-		//$('#complete').append('<div class="errorsize" style="width:'+err+'px;height:'+err+'px"></div><div class="errortext">'+str+'</div>');
 	});
 
 	/* DEMO method, DELETE */
@@ -142,7 +143,7 @@ $(function() {
 		
 		var totalTime = moveWait + flexWait + extra;
 
-		$('#back').hide();
+		//$('#back').hide();
 		$(orb.dom).show();
 		
 		calibrationPoints.forEach(function(point, index) {
@@ -168,7 +169,7 @@ $(function() {
 				socket.emit('getPoint');
 				$(orb.dom).hide();
 				$('#complete').show();
-				$('#back').show();
+				//$('#back').show();
 			}, 1000);
 		}, totalTime*5);
 	}

@@ -2,6 +2,7 @@ express = require "express"
 stylus = require "stylus"
 socketio = require "socket.io"
 config = require "./config.json"
+nib = require "nib"
 
 app = do express
 
@@ -17,8 +18,15 @@ app.configure ->
   app.set "views", "#{__dirname}/views"
   app.set "view engine", "jade"
   app.use express.static "#{__dirname}/public"
-  app.use stylus.middleware
-    src: "#{__dirname}/public"
+  app.use stylus.middleware {
+    src: "#{__dirname}"
+    dest: "#{__dirname}/public/style"
+    compile: (str, path) ->
+      return stylus(str)
+        .set('filename', path)
+      # .set('compress', true)
+        .use(nib())
+  }
 
   app.get "/", (req, res) -> 
     res.send "index"
@@ -37,7 +45,10 @@ io.sockets.on "connection", (socket) ->
     socket.emit "endCal"
 
   socket.on "getPoint", ->
-    socket.emit "getPoint", {x: 0.52, y: 0.45}
+    #socket.emit "getPoint", {x: 0.52, y: 0.45}
+    socket.emit "getPoint",
+      x: Math.random()*0.2+0.45
+      y: Math.random()*0.2+0.45
 
   socket.on "addPoint", (point) ->
     socket.emit "addPoint", point
