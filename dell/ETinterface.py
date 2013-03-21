@@ -37,5 +37,5 @@ class ETEvent(object):
     def __init__(self, x, y, timestamp):
         self.x=x
         self.y=y
-        self.time=timestamp
+        self.timestamp=timestamp
     
