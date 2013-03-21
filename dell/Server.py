@@ -11,11 +11,56 @@ name = 1
 def enum(**enums):
     return type('Enum', (), enums)
 
-cmds = enum(GETPOINT=1, STARTCAL=2, ADDPOINT=3, CLEAR=4, ENDCAL=5, UNAVALIABLE=6, NAME=7, OST=8, TEAPOT=9)
+cmds = enum(GETPOINT=1, STARTCAL=2, ADDPOINT=3, CLEAR=4, ENDCAL=5, UNAVALIABLE=6, NAME=7, OST=80, TEAPOT=90)
 lengths = enum(COMMAND=1, GETPOINT=24, STARTCAL=8, ADDPOINT=16, NAME=1, OST=4, TEAPOT=1)
 
 class ConnHandler(Thread):
+    
+    def __init__(self, conn, addr):
+        global cmds
+        
+        self.conn = conn
+        self.addr = addr
+        self.listen = False
+        self.stop = False
 
+        self.protocol = {
+            cmds.GETPOINT: self.getPoint,
+            #cmds.STARTCAL: self.startCal,
+            #cmds.ADDPOINT: self.addPoint,
+            #cmds.CLEAR: self.clearCal,
+            #cmds.ENDCAL: self.endCal,
+            cmds.UNAVALIABLE: self.unavaliable,
+            cmds.NAME: self.sendName,
+            cmds.OST: self.sayCheese,
+            cmds.TEAPOT: self.IAmATeapot,
+
+            }#TODO Fill with functions for great justice.
+
+        Thread.__init__(self)
+
+    def __hash__(self):
+        return hash(self.addr)
+
+    def run(self):
+        global name
+        global cmds
+        global lengths
+        global shutdown
+        
+        self.sendName()
+        while not self.stop or not shutdown:
+            try:
+                data = self.conn.recieve(lengths.COMMAND)
+            except error:
+                self.panic()
+                
+            if len(data) < lengths.COMMAND:
+               continue
+            command = struct.unpack("!B", data)[0]
+            self.protocol.get(command, self.unavaliable)()
+
+    
     # Panic method.
     # If an error is found on the network, call this and let it handle it "gracefully".
     def panic(self):
@@ -31,39 +76,30 @@ class ConnHandler(Thread):
             self.conn.send(struct.pack("!B", cmds.UNAVALIABLE))
         except error:
             self.panic()
-    
-    def __init__(self, conn, addr):
-        global cmds
-        
-        self.conn = conn
-        self.addr = addr
-        self.listen = False
-        self.stop = False
 
-        self.protocol = dict() #TODO Fill with functions for great justice.
+    def getPoint():
+        self.listen = not self.listen
 
-        Thread.__init__(self)
+    def startCal():
+        pass
 
-    def __hash__(self):
-        return hash(self.addr)
+    def addPoint():
+        pass
 
-    def run(self):
-        global name
-        global cmds
-        global lengths
-        global shutdown
-        
+    def clearCal():
+        pass
+
+    def endCal():
+        pass
+
+    def sendName():
         self.conn.send(struct.pack("!2B", cmds.NAME, name))
-        while not self.stop or not shutdown:
-            try:
-                data = self.conn.recieve(lengths.COMMAND)
-            except error:
-                self.panic()
-                
-            if len(data) < lengths.COMMAND:
-               continue
-            command = struct.unpack("!B", data)[0]
-            self.protocol.get(command, self.unavaliable)()
+
+    def sayCheese():
+        self.conn.send("Appenzeller")
+
+    def IAmATeapot():
+        self.conn.send("418 I am a teapot!")
 
 def startServer(addr):
     global shutdown #Use the global shutdown variable
