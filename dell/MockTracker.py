@@ -1,16 +1,18 @@
 from multiprocessing import Process
+from threading import Thread
 from ETinterface import (EyeTracker, ETEvent, ETError)
 import time
 
 #Fake eye tracker that gives points in a circle.
 #Thinking about making the calibration set up a polygon that is traced instead.
 class MockTracker(EyeTracker):
-    def __init__(self, name=1):
-        self.active=False
+    def __init__(self, onETEventHandler, name=1):
+        self.active=True
         self.calibrating=False
         self.name=name
+        self.onETEventHandler = onETEventHandler
 
-        proc = Process(target=self.run)
+        proc = Thread(target=self.run)
         
         proc.start()
 
@@ -37,14 +39,18 @@ class MockTracker(EyeTracker):
 
     def getName(self):
         return self.name
-        
+
+    def onETEvent(self, etevent):
+        print("DATA!")
+        self.onETEventHandler(etevent)
 
     def run(self):
+        print("Starting generation of points!")
         for event in circle_generator(radius=0.2, offset=(0.5, 0.5)):
+            #print("ETDATA!" + str(self.active))
             if self.active:
+                #print("Active!")
                 self.onETEvent(event)
-            else:
-                return
         
             
 def circle_generator(radius=1, offset=(0,0), step=0.01, start=0, stop=None):
