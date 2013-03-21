@@ -113,7 +113,7 @@ class ConnHandler(Thread):
 
 def sendData(etevent):
     global handlers
-    print("Handlers: %s\n" % str(handlers))
+    #print("Handlers: %s\n" % str(handlers))
     for h in handlers:
         if h.listen:
             h.send(struct.pack("!B2dq", cmds.GETPOINT, etevent.x, etevent.y, etevent.timestamp)) #This might go bad if one handler blocks.
