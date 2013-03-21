@@ -1,12 +1,14 @@
 from network import TCPHandler
 from socket import error
 from threading import Thread
+
+from MockTracker import MockTracker
+
 import struct
 import datetime
 
 shutdown = False
 handlers = dict()
-name = 1
 
 def enum(**enums):
     return type('Enum', (), enums)
@@ -69,6 +71,9 @@ class ConnHandler(Thread):
         del handlers[self]
         self.stop = True
 
+    def send(self, data):
+        h.conn.send(data)
+
     # Sends a signal to the other side, that the command they attempted to use is unavailiable at this time.
     # Panics if error if found on send.
     def unavaliable(self):
@@ -93,7 +98,8 @@ class ConnHandler(Thread):
         pass
 
     def sendName():
-        self.conn.send(struct.pack("!2B", cmds.NAME, name))
+        global eyetracker
+        self.conn.send(struct.pack("!2B", cmds.NAME, eyetracker.name))
 
     def sayCheese():
         self.conn.send("Appenzeller")
@@ -101,11 +107,21 @@ class ConnHandler(Thread):
     def IAmATeapot():
         self.conn.send("418 I am a teapot!")
 
+def sendData(etevent):
+    for h in handlers:
+        if h.listen:
+            h.send(struct.pack("!B2dq", cmds.GETPOINT, etevent.x, etevent.y, etevent.timestamp)) #This might go bad if one handler blocks.
+
 def startServer(addr):
     global shutdown #Use the global shutdown variable
     global handlers #And the global map of handlers
+    global eyetracker #We have a global tracker aswell.
     
     serverSocket = TCPHandler(addr, None, True) # Create a server socket for listening to connection attempts
+    eyetracker = MockTracker() # Connect to the eyetracker
+
+    eyetracker.onETEvent = sendData
+    
     with serverSocket: # Make sure it is closed!
         while not shutdown: #Loop until we recive signal of shutdown
             try:
