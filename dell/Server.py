@@ -7,6 +7,9 @@ from MockTracker import MockTracker
 import struct
 import datetime
 
+global shutdown
+global handlers
+
 shutdown = False
 handlers = dict()
 
@@ -49,7 +52,8 @@ class ConnHandler(Thread):
         global cmds
         global lengths
         global shutdown
-        
+
+        print("Starting new thread!")
         self.sendName()
         while not self.stop or not shutdown:
             try:
@@ -72,7 +76,7 @@ class ConnHandler(Thread):
         self.stop = True
 
     def send(self, data):
-        h.conn.send(data)
+        self.conn.send(data)
 
     # Sends a signal to the other side, that the command they attempted to use is unavailiable at this time.
     # Panics if error if found on send.
@@ -82,32 +86,34 @@ class ConnHandler(Thread):
         except error:
             self.panic()
 
-    def getPoint():
+    def getPoint(self):
         self.listen = not self.listen
 
-    def startCal():
+    def startCal(self):
         pass
 
-    def addPoint():
+    def addPoint(self):
         pass
 
-    def clearCal():
+    def clearCal(self):
         pass
 
-    def endCal():
+    def endCal(self):
         pass
 
-    def sendName():
+    def sendName(self):
         global eyetracker
         self.conn.send(struct.pack("!2B", cmds.NAME, eyetracker.name))
 
-    def sayCheese():
+    def sayCheese(self):
         self.conn.send("Appenzeller")
 
-    def IAmATeapot():
+    def IAmATeapot(self):
         self.conn.send("418 I am a teapot!")
 
 def sendData(etevent):
+    global handlers
+    print("Handlers: %s\n" % str(handlers))
     for h in handlers:
         if h.listen:
             h.send(struct.pack("!B2dq", cmds.GETPOINT, etevent.x, etevent.y, etevent.timestamp)) #This might go bad if one handler blocks.
@@ -118,9 +124,11 @@ def startServer(addr):
     global eyetracker #We have a global tracker aswell.
     
     serverSocket = TCPHandler(addr, None, True) # Create a server socket for listening to connection attempts
-    eyetracker = MockTracker() # Connect to the eyetracker
+    eyetracker = MockTracker(sendData) # Connect to the eyetracker
 
-    eyetracker.onETEvent = sendData
+    if not eyetracker.enable():
+        print("WAT?")
+    print("Active? %s" % str(eyetracker.active))
     
     with serverSocket: # Make sure it is closed!
         while not shutdown: #Loop until we recive signal of shutdown
