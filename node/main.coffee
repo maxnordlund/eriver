@@ -1,7 +1,8 @@
 express = require "express"
 stylus = require "stylus"
 socketio = require "socket.io"
-config = require "./config.json"
+config = require "../config.json"
+fs = require "fs"
 nib = require "nib"
 
 app = do express
@@ -34,6 +35,22 @@ app.configure ->
   app.get "/calibrate/:msg", (req, res) ->
     res.render "calibrate"
     #msg: req.params.msg + "s calibration page!"
+
+  app.get "/heatmap/:num.png", (req, res) ->
+    num = req.params.num
+    if config.heatmapPath.indexOf '/' is 0
+      path = "#{config.heatmapPath}/#{num}.png"
+    else
+      path = "#{__dirname}/../#{config.heatmapPath}/#{num}.png"
+    res.sendfile path
+
+  app.get "/stats/:num.json", (req, res) ->
+    num = req.params.num
+    if config.heatmapPath.indexOf '/' is 0
+      path = "#{config.statsPath}/#{num}.png"
+    else
+      path = "#{__dirname}/../#{config.statsPath}/#{num}.png"
+    res.sendfile path
 
 io.sockets.on "connection", (socket) ->
 
