@@ -46,13 +46,15 @@ app.get "/calibrate/:num", (req, res) ->
   if ets[num]?
     if ets[num].isCalibrating
       res.render "unavailable",
-        id: num
+        id: num,
+        cal: true 
     else
       res.render "calibrate"
     #TODO
   else
     res.render "unavailable",
-      id: num
+      id: num,
+      cal: false
     #TODO
 
 app.get "/heatmap/:num.png", (req, res) ->
