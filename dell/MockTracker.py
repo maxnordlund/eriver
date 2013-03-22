@@ -3,14 +3,15 @@ from threading import Thread
 from ETinterface import (EyeTracker, ETEvent, ETError)
 import time
 
+# Implements the interface given in documentation to EyeTracker class.
 #Fake eye tracker that gives points in a circle.
 #Thinking about making the calibration set up a polygon that is traced instead.
 class MockTracker(EyeTracker):
-    def __init__(self, onETEventHandler, name=1):
+    def __init__(self, onETEvent, name=1):
         self.active=True
         self.calibrating=False
         self.name=name
-        self.onETEventHandler = onETEventHandler
+        self.onETEvent = onETEvent
 
         proc = Thread(target=self.run)
         
@@ -25,7 +26,7 @@ class MockTracker(EyeTracker):
 
     def startCalibration(self):
         self.calibrating=True
-        return True
+        return True # Does not really support it, but fakes it.
 
     def endCalibration(self):
         self.calibrating=False
@@ -40,9 +41,11 @@ class MockTracker(EyeTracker):
     def getName(self):
         return self.name
 
-    def onETEvent(self, etevent):
-        print("DATA!")
-        self.onETEventHandler(etevent)
+    def getRates(self):
+        return set([24, 25, 30, 60, 120])
+
+    def setRate(self, rate):
+        self.fps = rate
 
     def run(self):
         print("Starting generation of points!")
@@ -50,7 +53,8 @@ class MockTracker(EyeTracker):
             #print("ETDATA!" + str(self.active))
             if self.active:
                 #print("Active!")
-                self.onETEvent(event)
+                self.callETEvent(event)
+            time.sleep(1/self.fps)
         
             
 def circle_generator(radius=1, offset=(0,0), step=0.01, start=0, stop=None):
