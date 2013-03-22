@@ -58,9 +58,9 @@ class EyeTracker(object):
         raise NotImplementedError
 
     # Free for interpretation of the implementor.
-    # Returns a string that identifies the tracker.
+    # Returns a integer that identifies the tracker.
     def getName(self):
-        return "Eye Tracker"
+        return 0
 
     # Gives a set of rates for which the tracker supports delivery of ETEvent.
     # Common values include 24, 25 30, 60 and 120.
