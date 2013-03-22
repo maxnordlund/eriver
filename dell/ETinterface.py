@@ -11,6 +11,8 @@ class EyeTracker(object):
     # This method calls the function variable onETEvent.
     # As the parameter it use the second parameter.
     # That should be of the type ETEvent or similar.
+    # Can be overrided if the data should be manipulated before client use
+    # or if extra side effects should be performed.
     def callETEvent(self, etevent):
         self.onETEvent(etevent)
 
@@ -65,6 +67,7 @@ class EyeTracker(object):
     # Gives a set of rates for which the tracker supports delivery of ETEvent.
     # Common values include 24, 25 30, 60 and 120.
     # Use -1 for unknown or variable rates.
+    # If -1 is returned, the implementation takes it upon itself to be able to handle all requested framerates.
     def getRates(self):
         return set([-1])
 
