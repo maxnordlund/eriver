@@ -1,0 +1,5 @@
+{
+  "heatmapPath" : "heatmaps",
+  "statsPath" : "stats",
+  "port" : 3000
+}
