@@ -1,7 +1,7 @@
 express = require "express"
 stylus = require "stylus"
 socketio = require "socket.io"
-etmanager = do require "./etman.coffee"
+etman = require "./etman.coffee"
 config = require "../config.json"
 fs = require "fs"
 nib = require "nib"
@@ -17,6 +17,11 @@ server = app.listen port, ->
 io = socketio.listen server
 
 pathCache = {}
+etmanager = do etman.new
+console.log etmanager
+#ets = etmanager.listen config.ets
+
+#do etmanager.test # TODO
 
 app.configure ->
   app.set "views", "#{__dirname}/views"
@@ -33,9 +38,6 @@ app.configure ->
 
 app.get "/", (req, res) -> 
   res.send "index"
-
-ets = etmanager.listen config.ets
-do etmanager.test # TODO
 
 app.get "/calibrate/:num", (req, res) ->
   num = req.params.num

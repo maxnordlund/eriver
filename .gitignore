@@ -26,7 +26,7 @@ node_modules
 #public/style/bootstrap*
 
 # Binaries #
-##########
+############
 # Compiled Object files
 *.slo
 *.lo
@@ -236,3 +236,8 @@ UpgradeLog*.htm
 # SQL Server files
 App_Data/*.mdf
 App_Data/*.ldf
+
+# Dropbox #
+###########
+*.dropbox
+Icon?
