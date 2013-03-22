@@ -1,5 +1,9 @@
 {
   "heatmapPath" : "heatmaps",
   "statsPath" : "stats",
+  "ets" : [
+    "127.0.0.1:3031",
+    "127.0.1.1:3031"
+  ],
   "port" : 3000
 }

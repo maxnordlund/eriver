@@ -1,6 +1,7 @@
 express = require "express"
 stylus = require "stylus"
 socketio = require "socket.io"
+etmanager = do require "./etman.coffee"
 config = require "../config.json"
 fs = require "fs"
 nib = require "nib"
@@ -33,18 +34,13 @@ app.configure ->
 app.get "/", (req, res) -> 
   res.send "index"
 
-ets = []
-ets[0] = {
-  isCalibrating: true
-}
-ets[1] = {
-  isCalibrating: false
-}
+ets = etmanager.listen config.ets
+do etmanager.test # TODO
 
 app.get "/calibrate/:num", (req, res) ->
   num = req.params.num
   if ets[num]?
-    if ets[num].isCalibrating
+    if ets[num].cal
       res.render "unavailable",
         id: num,
         cal: true 
