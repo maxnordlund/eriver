@@ -111,7 +111,8 @@ class ConnHandler(Thread):
         except:
             panic()
 
-        if not len(data) == lengths.STARTCAL
+        if not len(data) == lengths.STARTCAL:
+            returns
         angle = struct.unpack("!q", data)[0]
         if not eyetracker.startCalibration(angle):
             self.unavaliable()
