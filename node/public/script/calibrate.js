@@ -165,8 +165,8 @@ $(function() {
 			socket.emit('endCal');
 
 			setTimeout(function() {
-				socket.emit('getPoint');
-				socket.emit('getPoint');
+				socket.emit('getPoint'); //start getPoint
+				socket.emit('getPoint'); //end getPoint
 				$(orb.dom).hide();
 				$('#complete').show();
 				//$('#back').show();

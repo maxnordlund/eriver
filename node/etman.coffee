@@ -1,5 +1,5 @@
 net = require "net"
-
+# TODO TEST
 ETManager = () ->
 	@ips = []
 	@list = []
@@ -7,20 +7,18 @@ ETManager = () ->
 
 ETManager::listen = (ips) ->
 	@ips = ips;
-
 	for ip in @ips
 		console.log ip
-
 	return @list;
 
-#ETManager::
-
 ETManager::test = () ->
-	if list?
-		list[0] =
+	if @list?
+		@list[0] =
 			cal: true
-		list[1] =
+			getting: false
+		@list[1] =
 			cal: false
+			getting: false
 	else
 		throw new Error 'No list!'
 
@@ -30,4 +28,6 @@ client = net.connect
 	console.log 'connected'
 ###
 
-exports.new = ETManager;
+exports.new = ETManager
+exports.test = ETManager::test
+exports.listen = ETManager::listen

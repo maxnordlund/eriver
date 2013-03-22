@@ -17,11 +17,15 @@ server = app.listen port, ->
 io = socketio.listen server
 
 pathCache = {}
+# TODO TEST START
 etmanager = do etman.new
-console.log etmanager
-#ets = etmanager.listen config.ets
+#console.log etmanager
+etmanager.listen config.ets # TEST that config.ets works and listen prints them *WORKING*
+do etmanager.test # FILL etmanager.list with testing values *WORKING*
+ets = etmanager.list
+#console.log ets
 
-#do etmanager.test # TODO
+#do etmanager.test # TODO TEST STOP
 
 app.configure ->
   app.set "views", "#{__dirname}/views"
@@ -91,10 +95,12 @@ io.sockets.on "connection", (socket) ->
     socket.emit "endCal"
 
   socket.on "getPoint", ->
-    #socket.emit "getPoint", {x: 0.52, y: 0.45}
-    socket.emit "getPoint",
+    ets[0].getting = !ets[0].getting  # TODO TEST
+    if ets[0].getting                 # TODO TEST
+      socket.emit "getPoint",
       x: Math.random()*0.2+0.45
       y: Math.random()*0.2+0.45
+    
 
   socket.on "addPoint", (point) ->
     socket.emit "addPoint", point
