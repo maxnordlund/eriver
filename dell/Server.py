@@ -1,6 +1,6 @@
 from network import TCPHandler
 from socket import error
-from threading import Thread
+from threading import (Thread, Lock)
 
 from MockTracker import MockTracker
 
@@ -9,9 +9,11 @@ import datetime
 
 global shutdown
 global handlers
+global handlersLock
 
 shutdown = False
 handlers = dict()
+handlersLock = Lock()
 
 def enum(**enums):
     return type('Enum', (), enums)
@@ -71,12 +73,18 @@ class ConnHandler(Thread):
     # If an error is found on the network, call this and let it handle it "gracefully".
     def panic(self):
         global handlers
+        global handlersLock
 
+        handlersLock.acquire()
         del handlers[self]
+        handlersLock.release()
         self.stop = True
 
     def send(self, data):
-        self.conn.send(data)
+        try:
+            self.conn.send(data)
+        except error:
+            self.panic()
 
     # Sends a signal to the other side, that the command they attempted to use is unavailiable at this time.
     # Panics if error if found on send.
@@ -87,40 +95,77 @@ class ConnHandler(Thread):
             self.panic()
 
     def getPoint(self):
+        global lengths
+        try:
+            self.conn.recieve(lengths.GETPOINT)
+        except:
+            panic()
         self.listen = not self.listen
 
     def startCal(self):
-        pass
+        global eyetracker
+        global lengths
+        data = ""
+        try:
+            data = self.conn.recieve(lengths.STARTCAL)
+        except:
+            panic()
+
+        if not len(data) == lengths.STARTCAL
+        angle = struct.unpack("!q", data)[0]
+        if not eyetracker.startCalibration(angle):
+            self.unavaliable()
 
     def addPoint(self):
-        pass
+        global eyetracker
+        if not eyetracker.addPoint():
+            self.unavaliable()
 
     def clearCal(self):
-        pass
+        global eyetracker
+        if not eyetracker.clearCalibration():
+            self.unavaliable()
 
     def endCal(self):
-        pass
+        global eyetracker
+        if not eyetracker.endCalibration():
+            self.unavaliable()
 
     def sendName(self):
         global eyetracker
-        self.conn.send(struct.pack("!2B", cmds.NAME, eyetracker.name))
+        try:
+            self.conn.send(struct.pack("!2B", cmds.NAME, eyetracker.name))
+
+        except error:
+            self.panic()
 
     def sayCheese(self):
-        self.conn.send("Appenzeller")
+        try:
+            self.conn.send("Appenzeller")
+        except error:
+            self.panic()
 
     def IAmATeapot(self):
-        self.conn.send("418 I am a teapot!")
+        try:
+            self.conn.send("418 I am a teapot!")
+        except error:
+            self.panic()
 
 def sendData(etevent):
     global handlers
+    global handlersLock
     #print("Handlers: %s\n" % str(handlers))
-    for h in handlers:
-        if h.listen:
-            h.send(struct.pack("!B2dq", cmds.GETPOINT, etevent.x, etevent.y, etevent.timestamp)) #This might go bad if one handler blocks.
+    #Do not block. This leads to lost events when clients disconnect, but hey, better than having the server lag behind...
+    if handlersLock.acquire(False):
+        for h in handlers:
+            if h.listen:
+                h.send(struct.pack("!B2dq", cmds.GETPOINT, etevent.x, etevent.y, etevent.timestamp)) #This might go bad if one handler blocks.
+        handlersLock.release()
 
 def startServer(addr):
     global shutdown #Use the global shutdown variable
     global handlers #And the global map of handlers
+    global handlersLock 
     global eyetracker #We have a global tracker aswell.
     
     serverSocket = TCPHandler(addr, None, True) # Create a server socket for listening to connection attempts
@@ -136,7 +181,9 @@ def startServer(addr):
                 conn, addr = serverSocket.accept() #Blockingly accept connections
                 print("FRIEND! AWSUM THX!\n")
                 h = ConnHandler(conn, addr) #Take new connection and fork off a handler
+                handlersLock.acquire() #We do not want the iterator to be mad at us for modifying the dictionary during its run.
                 handlers[h] = True #Put it in dictionary for safe storage.
+                handlersLock.release() # And release!
                 h.start() #And kick it away!
             except (error, KeyboardInterrupt) as e:
                 shutdown = True #O NOES!
