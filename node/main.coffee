@@ -15,6 +15,8 @@ server = app.listen port, ->
 
 io = socketio.listen server
 
+pathCache = {}
+
 app.configure ->
   app.set "views", "#{__dirname}/views"
   app.set "view engine", "jade"
@@ -38,19 +40,29 @@ app.configure ->
 
   app.get "/heatmap/:num.png", (req, res) ->
     num = req.params.num
-    if config.heatmapPath.indexOf '/' is 0
+    if config.heatmapPath.indexOf('/') is 0
       path = "#{config.heatmapPath}/#{num}.png"
+      res.sendfile path
     else
-      path = "#{__dirname}/../#{config.heatmapPath}/#{num}.png"
-    res.sendfile path
+      path = "../#{config.heatmapPath}/#{num}.png"
+      fs.realpath path, pathCache, (err, resolvedPath) ->
+        if err?
+          console.log err
+          return
+        res.sendfile resolvedPath
 
   app.get "/stats/:num.json", (req, res) ->
     num = req.params.num
-    if config.heatmapPath.indexOf '/' is 0
-      path = "#{config.statsPath}/#{num}.png"
+    if config.heatmapPath.indexOf('/') is 0
+      path = "#{config.statsPath}/#{num}.json"
+      res.sendfile path
     else
-      path = "#{__dirname}/../#{config.statsPath}/#{num}.png"
-    res.sendfile path
+      path = "../#{config.statsPath}/#{num}.json"
+      fs.realpath path, pathCache, (err, resolvedPath) ->
+        if err?
+          console.log err
+          return
+        res.sendfile resolvedPath
 
 io.sockets.on "connection", (socket) ->
 
