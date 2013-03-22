@@ -8,7 +8,7 @@ class EyeTracker(object):
     def getState(self):
         raise NotImplementedError
 
-    def startCalibration(self):
+    def startCalibration(self, angle):
         raise NotImplementedError
 
     def endCalibration(self):
