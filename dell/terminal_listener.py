@@ -7,14 +7,14 @@ from threading import Thread
 def start_client(addr):
     tcphandler = TCPHandler(addr, None, False)
     with tcphandler:
-        tcphandler.send(struct.pack("!B", 1))
+        tcphandler.send(struct.pack("!B2dq", 1, 0, 0, 0))
         data = tcphandler.recieve(2)
         (cmd, name) = struct.unpack("!2B", data)
         print("Connected to Eyetracker %d" % name)
         
         while True:
             data = tcphandler.recieve(25)
-            print("Data Recieved!\n")
+            #print("Data Recieved!\n")
             if len(data) < 25:
                 continue
             etdata = struct.unpack("!B2dq", data)

@@ -1,3 +1,3 @@
-start cmd /c run.bat
+start run.bat
 start cmd /c run_client.bat
 start cmd /c run_client.bat

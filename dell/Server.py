@@ -1,5 +1,6 @@
 from network import TCPHandler
 from socket import error
+import logging
 from threading import (Thread, Lock)
 
 from MockTracker import MockTracker
@@ -14,6 +15,10 @@ global handlersLock
 shutdown = False
 handlers = dict()
 handlersLock = Lock()
+
+LOG_FILENAME = 'eriver.log'
+logging.basicConfig(filemode='w', filename=LOG_FILENAME,level=logging.DEBUG)
+logger = logging.getLogger("Server")
 
 def enum(**enums):
     return type('Enum', (), enums)
@@ -49,15 +54,18 @@ class ConnHandler(Thread):
     def __hash__(self):
         return hash(self.addr)
 
+    def __str__(self):
+        return str(self.addr)
+
     def run(self):
         global name
         global cmds
         global lengths
         global shutdown
 
-        print("Starting new thread!")
+        logger.info("\t\t\tStarting new thread!")
         self.sendName()
-        while not self.stop or not shutdown:
+        while not (self.stop or shutdown):
             try:
                 data = self.conn.recieve(lengths.COMMAND)
             except error:
@@ -74,11 +82,15 @@ class ConnHandler(Thread):
     def panic(self):
         global handlers
         global handlersLock
-
+        logger.info("\t\t\tO NOES! FRIEND %s DONT LEIK ME ANYMORE!" % str(self))
         handlersLock.acquire()
-        del handlers[self]
+        try:
+            del handlers[self]
+        except KeyError:
+            logger.warning("Tried to delete client %s that did not exist" % str(self))
         handlersLock.release()
         self.stop = True
+        
 
     def send(self, data):
         try:
@@ -99,7 +111,7 @@ class ConnHandler(Thread):
         try:
             self.conn.recieve(lengths.GETPOINT)
         except:
-            panic()
+            self.panic()
         self.listen = not self.listen
 
     def startCal(self):
@@ -109,7 +121,7 @@ class ConnHandler(Thread):
         try:
             data = self.conn.recieve(lengths.STARTCAL)
         except:
-            panic()
+            self.panic()
 
         if not len(data) == lengths.STARTCAL:
             returns
@@ -155,10 +167,11 @@ class ConnHandler(Thread):
 def sendData(etevent):
     global handlers
     global handlersLock
-    #print("Handlers: %s\n" % str(handlers))
+    #logger.debug("Handlers: %s" % str(handlers))
     #Do not block. This leads to lost events when clients disconnect, but hey, better than having the server lag behind...
     if handlersLock.acquire(False):
         for h in handlers:
+            logger.debug(str(h) + str(h.listen))
             if h.listen:
                 h.send(struct.pack("!B2dq", cmds.GETPOINT, etevent.x, etevent.y, etevent.timestamp)) #This might go bad if one handler blocks.
         handlersLock.release()
@@ -173,14 +186,14 @@ def startServer(addr):
     eyetracker = MockTracker(sendData) # Connect to the eyetracker
 
     if not eyetracker.enable():
-        print("WAT?")
-    print("Active? %s" % str(eyetracker.active))
+        logger.critical("WAT? Eye tracker not enablable?")
+    logger.debug("Active? %s" % str(eyetracker.active))
     
     with serverSocket: # Make sure it is closed!
         while not shutdown: #Loop until we recive signal of shutdown
             try:
                 conn, addr = serverSocket.accept() #Blockingly accept connections
-                print("FRIEND! AWSUM THX!\n")
+                logger.info("\t\t\tFRIEND! AWSUM THX!")
                 h = ConnHandler(conn, addr) #Take new connection and fork off a handler
                 handlersLock.acquire() #We do not want the iterator to be mad at us for modifying the dictionary during its run.
                 handlers[h] = True #Put it in dictionary for safe storage.
@@ -192,10 +205,13 @@ def startServer(addr):
                     h.join() #CAN I HAS SYNCZ?
 
                 if isinstance(e, error):
+                    logger.critical("Unhandled network error in listener.")
                     raise
+                else:
+                    logger.warning("Server stopped by user.")
             
 
-    print("\tPLZ CLOSE EVERYTHING!")
+    logger.info("\tPLZ CLOSE EVERYTHING!")
         
 
 if __name__ == "__main__":
@@ -203,35 +219,35 @@ if __name__ == "__main__":
     import sys, traceback
     
     addr = ("0.0.0.0", 3031)
-    print("HAI\n")
-    print("CAN I HAS NETWORK?\n")
-    print("PLZ LISTEN 2 TCP " + str(addr) + "?\n")
-    print("\tAWSUM THX\n")
-    print("\t\tDO_STUFFS!\n")
+    logger.info("HAI")
+    logger.info("CAN I HAS NETWORK?")
+    logger.info("PLZ LISTEN 2 TCP " + str(addr) + "?")
+    logger.info("\tAWSUM THX")
+    logger.info("\t\tDO_STUFFS!")
     try:
         startServer(addr)
 
     except:
-        print("\tO NOES\n")
-        print("\t\tPANIC!\n")
+        logger.info("\tO NOES")
+        logger.info("\t\tPANIC!")
         exc_type, exc_value, exc_traceback = sys.exc_info()
-        print("\t\tLOOKZ! KITTY!")
+        logger.info("\t\tLOOKZ! KITTY!")
         try:
             with open("stderr.out", "a") as f:
-                f.write("KITTY! IT HID " + datetime.datetime.now().isoformat(' ') + "\n")
+                f.write("KITTY! IT HID " + datetime.datetime.now().isoformat(' '))
                 traceback.print_exception(exc_type, exc_value, exc_traceback,
                                   limit=5, file=f)
-                f.write("\n\n")
-                print("\t\tAWWW.. IT HID IN BOX " + f.name)
+                f.write("\n---------\n")
+                logger.info("\t\tAWWW.. IT HID IN BOX " + f.name)
         
         except:
             traceback.print_exception(exc_type, exc_value, exc_traceback,
                               limit=5)
-            print("\t\tAWWW.. IT WANTED TO PLAY...")
+            logger.info("\t\tAWWW.. IT WANTED TO PLAY...")
         
         
     finally:
-        print("KTHXBYE!\n")
+        logger.info("KTHXBYE!")
 
 
     
