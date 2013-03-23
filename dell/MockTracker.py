@@ -2,6 +2,7 @@ from multiprocessing import Process
 from threading import Thread
 from ETinterface import (EyeTracker, ETEvent, ETError)
 import time
+import math
 
 # Implements the interface given in documentation to EyeTracker class.
 #Fake eye tracker that gives points in a circle.
