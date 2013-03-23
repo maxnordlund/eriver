@@ -8,11 +8,12 @@ import math
 #Fake eye tracker that gives points in a circle.
 #Thinking about making the calibration set up a polygon that is traced instead.
 class MockTracker(EyeTracker):
-    def __init__(self, onETEvent, name=1):
+    def __init__(self, onETEvent, name=1, fps=60):
         self.active=True
         self.calibrating=False
         self.name=name
         self.onETEvent = onETEvent
+        self.fps = fps
 
         proc = Thread(target=self.run)
         
