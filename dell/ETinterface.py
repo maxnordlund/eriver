@@ -1,12 +1,12 @@
+# A default implementation of onETEvent
+def default_onETEvent(etevent):
+    pass
+
 class EyeTracker(object):
 
     # A variable holding a function.
     # It is called when a point is gotten from the tracker.
     onETEvent = default_onETEvent
-
-    # A default implementation of onETEvent
-    def default_onETEvent(etevent):
-        pass
 
     # This method calls the function variable onETEvent.
     # As the parameter it use the second parameter.
