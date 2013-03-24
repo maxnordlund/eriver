@@ -8,9 +8,8 @@ class NetHandler(object):
                self.socket = sock
           self.address = address
           self.set_blocking(blocking)
-          if listen:
-               self.socket.bind(address)
-               self.socket.listen(5)
+          self._listen = listen
+          
 
      def send(self, data, address=None):
           raise NotImplementedError('You need one of the child classes that implement this method.')
@@ -27,7 +26,9 @@ class NetHandler(object):
 
      #With statement methods
      def __enter__(self):
-          pass
+          if self._listen:
+               self.socket.bind(address)
+               self.socket.listen(5)
 
      def __exit__(self, type, vale, traceback):
           self.close()
@@ -38,7 +39,7 @@ class UDPHandler(NetHandler):
         super(UDPHandler, self).__init__(SOCK_DRAM, address, blocking, listen, socket)
         
     def send(self, data, address=None):
-        if address:
+        if not address == None:
             self.socket.sendto(data, address)
         else:
             self.socket.sendto(data, self.address)
