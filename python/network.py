@@ -1,7 +1,7 @@
 from socket import *
 
 class NetHandler(object):
-     def __init__(self, kind,address=('localhost', 3031), blocking=None, listen=False, sock=None):
+     def __init__(self, kind, address=('localhost', 3031), blocking=None, listen=False, sock=None):
           if (sock == None):
                self.socket = socket(AF_INET, kind)
           else:
