@@ -8,17 +8,12 @@ from MockTracker import MockTracker
 import struct
 import datetime
 
-global shutdown
-global handlers
-global handlersLock
-
 shutdown = False
 handlers = dict()
 handlersLock = Lock()
 
 LOG_FILENAME = 'eriver.log'
 logging.basicConfig(filemode='w', filename=LOG_FILENAME,level=logging.DEBUG)
-logger = logging.getLogger("Server")
 
 def enum(**enums):
     return type('Enum', (), enums)
@@ -28,9 +23,11 @@ lengths = enum(COMMAND=1, GETPOINT=24, STARTCAL=8, ADDPOINT=16, NAME=1, OST=4, T
 
 class ConnHandler(Thread):
     
-    def __init__(self, conn, addr):
+    def __init__(self, conn, addr, server):
         global cmds
-        
+
+        self.server = server
+        self.logger = logging.getLogger("")
         self.conn = conn
         self.addr = addr
         self.listen = False
@@ -58,12 +55,10 @@ class ConnHandler(Thread):
         return str(self.addr)
 
     def run(self):
-        global name
         global cmds
         global lengths
-        global shutdown
 
-        logger.info("\t\t\tStarting new thread!")
+        self.logger.info("\t\t\tStarting new thread!")
         self.sendName()
         while not (self.stop or shutdown):
             try:
@@ -80,15 +75,13 @@ class ConnHandler(Thread):
     # Panic method.
     # If an error is found on the network, call this and let it handle it "gracefully".
     def panic(self):
-        global handlers
-        global handlersLock
-        logger.info("\t\t\tO NOES! FRIEND %s DONT LEIK ME ANYMORE!" % str(self))
-        handlersLock.acquire()
+        self.logger.info("\t\t\tO NOES! FRIEND %s DONT LEIK ME ANYMORE!" % str(self))
+        self.server.handlersLock.acquire()
         try:
-            del handlers[self]
+            del self.server.handlers[self]
         except KeyError:
-            logger.warning("Tried to delete client %s that did not exist" % str(self))
-        handlersLock.release()
+            self.logger.warning("Tried to delete client %s that did not exist" % str(self))
+        self.server.handlersLock.release()
         self.stop = True
         
 
@@ -110,44 +103,39 @@ class ConnHandler(Thread):
         global lengths
         try:
             self.conn.recieve(lengths.GETPOINT)
-        except:
+        except error:
             self.panic()
         self.listen = not self.listen
 
     def startCal(self):
-        global eyetracker
         global lengths
         data = ""
         try:
             data = self.conn.recieve(lengths.STARTCAL)
-        except:
+        except error:
             self.panic()
 
         if not len(data) == lengths.STARTCAL:
             returns
         angle = struct.unpack("!q", data)[0]
-        if not eyetracker.startCalibration(angle):
+        if not self.server.eyetracker.startCalibration(angle):
             self.unavaliable()
 
     def addPoint(self):
-        global eyetracker
-        if not eyetracker.addPoint():
+        if not self.server.eyetracker.addPoint():
             self.unavaliable()
 
     def clearCal(self):
-        global eyetracker
-        if not eyetracker.clearCalibration():
+        if not self.server.eyetracker.clearCalibration():
             self.unavaliable()
 
     def endCal(self):
-        global eyetracker
-        if not eyetracker.endCalibration():
+        if not self.server.eyetracker.endCalibration():
             self.unavaliable()
 
     def sendName(self):
-        global eyetracker
         try:
-            self.conn.send(struct.pack("!2B", cmds.NAME, eyetracker.name))
+            self.conn.send(struct.pack("!2B", cmds.NAME, self.server.eyetracker.name))
 
         except error:
             self.panic()
@@ -164,54 +152,54 @@ class ConnHandler(Thread):
         except error:
             self.panic()
 
-def sendData(etevent):
-    global handlers
-    global handlersLock
-    #logger.debug("Handlers: %s" % str(handlers))
-    #Do not block. This leads to lost events when clients disconnect, but hey, better than having the server lag behind...
-    if handlersLock.acquire(False):
-        for h in handlers:
-            logger.debug(str(h) + str(h.listen))
-            if h.listen:
-                h.send(struct.pack("!B2dq", cmds.GETPOINT, etevent.x, etevent.y, etevent.timestamp)) #This might go bad if one handler blocks.
-        handlersLock.release()
+class ETServer(object):
+    def __init__(self, addr, name="ETServer"):
+        self.shutdown = False # A way for any part of the server to give a shutdown signal
+        self.handlers = dict()# All the handlers of the server
+        self.handlersLock = Lock()# A lock to regulate when parts can use the handlers.
+        self.eyetracker = MockTracker(self.sendData) #We need a tracker aswell.
+        self.logger = logging.getLogger(name) # A logger is good to have
+        
+        self.serverSocket = TCPHandler(addr, None, True) # Create a server socket for listening to connection attempts
 
-def startServer(addr):
-    global shutdown #Use the global shutdown variable
-    global handlers #And the global map of handlers
-    global handlersLock 
-    global eyetracker #We have a global tracker aswell.
-    
-    serverSocket = TCPHandler(addr, None, True) # Create a server socket for listening to connection attempts
-    eyetracker = MockTracker(sendData) # Connect to the eyetracker
+    def sendData(self, etevent):
+        #logger.debug("Handlers: %s" % str(handlers))
+        #Do not block. This leads to lost events when clients disconnect, but hey, better than having the server lag behind...
+        if self.handlersLock.acquire(False):
+            for h in self.handlers:
+                self.logger.debug(str(h) + str(h.listen))
+                if h.listen:
+                    h.send(struct.pack("!B2dq", cmds.GETPOINT, etevent.x, etevent.y, etevent.timestamp)) #This might go bad if one handler blocks.
+            self.handlersLock.release()
 
-    if not eyetracker.enable():
-        logger.critical("WAT? Eye tracker not enablable?")
-    logger.debug("Active? %s" % str(eyetracker.active))
-    
-    with serverSocket: # Make sure it is closed!
-        while not shutdown: #Loop until we recive signal of shutdown
-            try:
-                conn, addr = serverSocket.accept() #Blockingly accept connections
-                logger.info("\t\t\tFRIEND! AWSUM THX!")
-                h = ConnHandler(conn, addr) #Take new connection and fork off a handler
-                handlersLock.acquire() #We do not want the iterator to be mad at us for modifying the dictionary during its run.
-                handlers[h] = True #Put it in dictionary for safe storage.
-                handlersLock.release() # And release!
-                h.start() #And kick it away!
-            except (error, KeyboardInterrupt) as e:
-                shutdown = True #O NOES!
-                for h in handlers:
-                    h.join() #CAN I HAS SYNCZ?
+    def start(self):
+        if not self.eyetracker.enable():
+            self.logger.critical("WAT? Eye tracker not enablable?")
+        self.logger.debug("Active? %s" % str(self.eyetracker.active))
+        
+        with self.serverSocket: # Start listen and make sure it is closed!
+            while not shutdown: #Loop until we recive signal of shutdown
+                try:
+                    conn, addr = self.serverSocket.accept() #Blockingly accept connections
+                    self.logger.info("\t\t\tFRIEND! AWSUM THX!")
+                    h = ConnHandler(conn, addr, self) #Take new connection and fork off a handler
+                    self.handlersLock.acquire() #We do not want the iterator to be mad at us for modifying the dictionary during its run.
+                    self.handlers[h] = True #Put it in dictionary for safe storage.
+                    self.handlersLock.release() # And release!
+                    h.start() #And kick it away!
+                except (error, KeyboardInterrupt) as e:
+                    self.shutdown = True #O NOES!
+                    for h in handlers:
+                        h.join() #CAN I HAS SYNCZ?
 
-                if isinstance(e, error):
-                    logger.critical("Unhandled network error in listener.")
-                    raise
-                else:
-                    logger.warning("Server stopped by user.")
-            
+                    if isinstance(e, error):
+                        logger.critical("Unhandled network error in listener.")
+                        raise
+                    else:
+                        logger.warning("Server stopped by user.")
+                
 
-    logger.info("\tPLZ CLOSE EVERYTHING!")
+        logger.info("\tPLZ CLOSE EVERYTHING!")
         
 
 if __name__ == "__main__":
@@ -219,35 +207,24 @@ if __name__ == "__main__":
     import sys, traceback
     
     addr = ("0.0.0.0", 3031)
-    logger.info("HAI")
-    logger.info("CAN I HAS NETWORK?")
-    logger.info("PLZ LISTEN 2 TCP " + str(addr) + "?")
-    logger.info("\tAWSUM THX")
-    logger.info("\t\tDO_STUFFS!")
+    logging.info("HAI")
+    logging.info("CAN I HAS NETWORK?")
+    logging.info("PLZ LISTEN 2 TCP " + str(addr) + "?")
+    logging.info("\tAWSUM THX")
+    logging.info("\t\tDO_STUFFS!")
     try:
-        startServer(addr)
+        ETServer(addr).start()
 
-    except:
-        logger.info("\tO NOES")
-        logger.info("\t\tPANIC!")
+    except error:
+        logging.info("\tO NOES")
+        logging.info("\t\tPANIC!")
         exc_type, exc_value, exc_traceback = sys.exc_info()
-        logger.info("\t\tLOOKZ! KITTY!")
-        try:
-            with open("stderr.out", "a") as f:
-                f.write("KITTY! IT HID " + datetime.datetime.now().isoformat(' '))
-                traceback.print_exception(exc_type, exc_value, exc_traceback,
-                                  limit=5, file=f)
-                f.write("\n---------\n")
-                logger.info("\t\tAWWW.. IT HID IN BOX " + f.name)
-        
-        except:
-            traceback.print_exception(exc_type, exc_value, exc_traceback,
-                              limit=5)
-            logger.info("\t\tAWWW.. IT WANTED TO PLAY...")
-        
+        logging.info("\t\tLOOKZ! KITTY!")
+        logging.error("KITTY! IT HID " + datetime.datetime.now().isoformat(' '))
+        logging.error("Type:%s \t Value: %s\n%s" % (str(exc_type), str(exc_value), str(exc_traceback)))
         
     finally:
-        logger.info("KTHXBYE!")
+        logging.info("KTHXBYE!")
 
 
     
