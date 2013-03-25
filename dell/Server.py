@@ -56,7 +56,7 @@ class ConnHandler(Thread):
 
         self.logger.info("\t\t\tStarting new thread!")
         self.sendName()
-        while not (self.stop or shutdown):
+        while not (self.stop or self.server.shutdown):
             try:
                 data = self.conn.recieve(lengths.COMMAND)
             except error:
@@ -174,7 +174,7 @@ class ETServer(object):
         self.logger.debug("Active? %s" % str(self.eyetracker.active))
         
         with self.serverSocket: # Start listen and make sure it is closed!
-            while not shutdown: #Loop until we recive signal of shutdown
+            while not self.shutdown: #Loop until we recive signal of shutdown
                 try:
                     conn, addr = self.serverSocket.accept() #Blockingly accept connections
                     self.logger.info("\t\t\tFRIEND! AWSUM THX!")
