@@ -99,9 +99,22 @@ $(function() {
 	var socket = io.connect(location.protocol+'//'+location.host);
 
 	socket.on('connect', function() {
+		socket.emit('name', location.pathname.slice(-1));
+	});
+
+	socket.on('name', function() {
 		$('.popup').hide();
 		$('#prepare').show();
 	});
+
+	socket.on('unavailable', function() {
+		/*
+		setTimeout(function () {
+			socket.emit('name', location.pathname.slice(-1));
+		}, 2500); // TODO lower delay?
+		*/
+		location.reload();
+	});	
 
 	socket.on('disconnect', function() {
 		$(orb.dom).hide();
@@ -127,7 +140,7 @@ $(function() {
 		if (ready) {
 			e.stopPropagation();
 			$(this).parent().hide();
-
+			
 			socket.emit('startCal', {angle: parseFloat($('#angle').attr('value'))});
 		
 			socket.on('startCal', calibrate);

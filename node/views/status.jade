@@ -1,0 +1,16 @@
+!!! 5
+html
+  head
+    meta(name='charset', content='utf-8')
+    title ET Status
+    link(rel='stylesheet', type='text/css', href='/style/calibrate.css')
+    link(href='http://fonts.googleapis.com/css?family=Iceland:400,700', rel='stylesheet', type='text/css')
+    script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js')
+  body
+    #status.popup
+      img.logo(src='/img/eriver_logo.png', height='70px')
+      h2 ET Status
+      //- - for ip in ips
+        p id: #{ips.indexOf(ip)} - ip: #{ip} 
+        //- #{et.cal}, Getting: #{et.getting} 
+        //- ID, IP, connected?, canbecalibrated? (cal) 

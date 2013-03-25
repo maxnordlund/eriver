@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'Iceland';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Iceland'), local('Iceland-Regular'), url(/style/iceland.woff) format('woff');
+}
+
 body {
 	background-color: black;
 	margin: 0;
@@ -34,6 +41,10 @@ a:hover {
 	text-align: center;
 	border: 1px solid #555;
 	box-shadow: 0 0 35px white;
+}
+
+#status.popup {
+	width: 500px;
 }
 
 .popup .logo {
@@ -109,13 +120,11 @@ a:hover {
 	width: 100px;
 	height: 100px;
 	border-radius: 50%;
-	/*
 	background-color: red;
 	background-image: radial-gradient(red, rgb(0, 50, 50));
 	background-image: -webkit-radial-gradient(red, rgb(0, 50, 50));
 	background-image: -moz-radial-gradient(red, rgb(0, 50, 50));
-	*/
-	background-image: url(/img/davido.png);
+	/*background-image: url(/img/davido.png);*/
 	background-size: cover;
 }
 

@@ -1,7 +1,7 @@
 express = require "express"
 stylus = require "stylus"
 socketio = require "socket.io"
-etman = require "./etman.coffee"
+etmanager = require "./etman.coffee"
 config = require "../config.json"
 fs = require "fs"
 nib = require "nib"
@@ -11,21 +11,14 @@ app = do express
 port = config.port
 
 server = app.listen port, -> 
-  console.log process.cwd()
+  console.log process.cwd() # Current execution directory
   console.log "Listening on #{port}"
 
 io = socketio.listen server
 
 pathCache = {}
-# TODO TEST START
-etmanager = do etman.new
-#console.log etmanager
-etmanager.listen config.ets # TEST that config.ets works and listen prints them *WORKING*
-do etmanager.test # FILL etmanager.list with testing values *WORKING*
-ets = etmanager.list
-#console.log ets
 
-#do etmanager.test # TODO TEST STOP
+etmanager.connect config.ets # etmanager establishes connections to ips defined in config.ets
 
 app.configure ->
   app.set "views", "#{__dirname}/views"
@@ -41,23 +34,31 @@ app.configure ->
         .use(nib())
 
 app.get "/", (req, res) -> 
-  res.send "index"
+  ets = ((etmanager.get id) for id in [0...config.ets.length])
+  console.log ets
+  res.render "status"
+    ets: ets
+
+app.get "/calibrate", (req, res) -> 
+  res.render "status",
+    ips: config.ets
 
 app.get "/calibrate/:num", (req, res) ->
   num = req.params.num
-  if ets[num]?
-    if ets[num].cal
+  et = etmanager.get num
+  if et?
+    if et.cal
       res.render "unavailable",
-        id: num,
-        cal: true 
+        et
     else
       res.render "calibrate"
     #TODO
   else
-    res.render "unavailable",
+    et = 
       id: num,
       cal: false
-    #TODO
+    res.render "unavailable",
+      et
 
 app.get "/heatmap/:num.png", (req, res) ->
   num = req.params.num
@@ -87,29 +88,10 @@ app.get "/stats/:num.json", (req, res) ->
 
 io.sockets.on "connection", (socket) ->
 
-  socket.on "startCal", (angle) ->
-    socket.emit "startCal"
-    # ta vara på angle också!
-
-  socket.on "endCal", ->
-    socket.emit "endCal"
-
-  socket.on "getPoint", ->
-    ets[0].getting = !ets[0].getting  # TODO TEST
-    if ets[0].getting                 # TODO TEST
-      socket.emit "getPoint",
-      x: Math.random()*0.2+0.45
-      y: Math.random()*0.2+0.45
-    
-
-  socket.on "addPoint", (point) ->
-    socket.emit "addPoint", point
-
-  socket.on "clear", ->
-    socket.emit "clear"
-
-  socket.on "unavailable", ->
-    socket.emit "unavailable"
-
-  socket.on "disconnect", ->
-    return
+  socket.on "name", (id) ->
+    et = etmanager.get id
+    if et?
+      etmanager.pair id, socket
+      socket.emit "name", id
+    else
+      socket.emit "unavailable"
