@@ -49,20 +49,19 @@ class MockTracker(EyeTracker):
     def setRate(self, rate):
         self.fps = rate
 
+    def circle_generator(radius=1, offset=(0,0), step=0.01, start=0, stop=None):
+        t=start
+        while stop==None or t<stop:
+            #yield ETEvent(0.5, 0.5, 0)
+            yield ETEvent(x=math.cos(t)*radius+offset[0], y=math.sin(t)*radius+offset[1], timestamp=int(time.time()*1000))
+            t+=step
+
     def run(self):
         print("Starting generation of points!")
-        for event in circle_generator(radius=0.2, offset=(0.5, 0.5)):
+        for event in MockTracker.circle_generator(radius=0.2, offset=(0.5, 0.5)):
             #print("ETDATA!" + str(self.active))
             if self.active:
                 #print("Active!")
                 self.callETEvent(event)
             time.sleep(1/self.fps)
-        
-            
-def circle_generator(radius=1, offset=(0,0), step=0.01, start=0, stop=None):
-    t=start
-    while stop==None or t<stop:
-        #yield ETEvent(0.5, 0.5, 0)
-        yield ETEvent(x=math.cos(t)*radius+offset[0], y=math.sin(t)*radius+offset[1], timestamp=int(time.time()*1000))
-        t+=step
     
