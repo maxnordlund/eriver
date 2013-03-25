@@ -8,10 +8,6 @@ from MockTracker import MockTracker
 import struct
 import datetime
 
-shutdown = False
-handlers = dict()
-handlersLock = Lock()
-
 LOG_FILENAME = 'eriver.log'
 logging.basicConfig(filemode='w', filename=LOG_FILENAME,level=logging.DEBUG)
 
@@ -189,17 +185,17 @@ class ETServer(object):
                     h.start() #And kick it away!
                 except (error, KeyboardInterrupt) as e:
                     self.shutdown = True #O NOES!
-                    for h in handlers:
+                    for h in self.handlers:
                         h.join() #CAN I HAS SYNCZ?
 
                     if isinstance(e, error):
-                        logger.critical("Unhandled network error in listener.")
+                        self.logger.critical("Unhandled network error in listener.")
                         raise
                     else:
-                        logger.warning("Server stopped by user.")
+                        self.logger.warning("Server stopped by user.")
                 
 
-        logger.info("\tPLZ CLOSE EVERYTHING!")
+        self.logger.info("\tPLZ CLOSE EVERYTHING!")
         
 
 if __name__ == "__main__":
