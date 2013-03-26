@@ -1,5 +1,5 @@
 from multiprocessing import Process
-from threading import Thread
+from threading import (Thread, Lock)
 from ETinterface import (EyeTracker, ETEvent, ETError)
 import time
 from tobii import eye_tracking_io as etio
@@ -47,15 +47,24 @@ class MockTracker(EyeTracker):
         
     def setRate(self, rate):
         pass
-
-    def etlooker(self):
         
 
     def run(self):
-        browser = etio.browsing.EyetrackerBrowser(self.mainloop, self.etlooker)
+
+        lock = threading.Lock()
+
+        #Does this work?
+        def etlooker(event_type, event_name, eyetracker_info):
+            lock.release()
+            pass
+        lock.acquire()
+        browser = etio.browsing.EyetrackerBrowser(self.mainloop, etlooker)
+        lock.acquire()
+        lock.release()
         while self.running:
-            
-            
+            pass
+
+        browser.stop()
         self.mainloop.stop()
             
     
