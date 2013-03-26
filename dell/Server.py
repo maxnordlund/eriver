@@ -180,6 +180,8 @@ class ETServer(object):
         self.handlersLock = Lock()# A lock to regulate when parts can use the handlers.
         self.eyetracker = MockTracker(self.sendData) #We need a tracker aswell.
         self.logger = logging.getLogger(name) # A logger is good to have
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        self.logger.setFormatter(formatter)
         
         self.serverSocket = TCPHandler(addr, None, True) # Create a server socket for listening to connection attempts
 
