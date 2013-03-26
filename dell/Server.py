@@ -15,7 +15,7 @@ def enum(**enums):
     return type('Enum', (), enums)
 
 cmds = enum(GETPOINT=1, STARTCAL=2, ADDPOINT=3, CLEAR=4, ENDCAL=5, UNAVALIABLE=6, NAME=7, FLASH_KLUDGE=60, OST=80, TEAPOT=90)
-lengths = enum(COMMAND=1, GETPOINT=24, STARTCAL=8, ADDPOINT=16, NAME=1, OST=4, TEAPOT=1)
+lengths = enum(COMMAND=1, GETPOINT=24, STARTCAL=8, ADDPOINT=16, NAME=1, FLASH_KLUDGE=22, OST=4, TEAPOT=1)
 
 class ConnHandler(Thread):
     
@@ -39,7 +39,7 @@ class ConnHandler(Thread):
             cmds.NAME: self.sendName,
             cmds.OST: self.sayCheese,
             cmds.TEAPOT: self.IAmATeapot,
-            #cmds.FLASH_KLUDGE: self.getPoint
+            cmds.FLASH_KLUDGE: self.getPoint
 
             }#TODO Fill with functions for great justice.
 
@@ -74,7 +74,7 @@ class ConnHandler(Thread):
     # Panic method.
     # If an error is found on the network, call this and let it handle it "gracefully".
     def panic(self, what="FAT"):
-        self.logger.info("O NOES! FRIEND %s DONT LEIK ME ANYMORE!\n\t IT SAID I WAS %s!" % (str(self), what))
+        self.logger.error("O NOES! FRIEND %s DONT LEIK ME ANYMORE!\n\t IT SAID I WAS %s!" % (str(self), what))
         self.server.handlersLock.acquire()
         try:
             del self.server.handlers[self]
@@ -167,6 +167,7 @@ class ConnHandler(Thread):
     def Flash_Kludge(self):
         try:
             data = self.conn.recieve(lengths.FLASH_KLUDGE)
+            
         except error:
             self.panic("Error on read of flashkludge")
 
