@@ -9,12 +9,12 @@ import struct
 import datetime
 
 LOG_FILENAME = 'eriver.log'
-logging.basicConfig(filemode='w', filename=LOG_FILENAME,level=logging.DEBUG)
+logging.basicConfig(filemode='w', filename=LOG_FILENAME,level=logging.INFO)
 
 def enum(**enums):
     return type('Enum', (), enums)
 
-cmds = enum(GETPOINT=1, STARTCAL=2, ADDPOINT=3, CLEAR=4, ENDCAL=5, UNAVALIABLE=6, NAME=7, OST=80, TEAPOT=90)
+cmds = enum(GETPOINT=1, STARTCAL=2, ADDPOINT=3, CLEAR=4, ENDCAL=5, UNAVALIABLE=6, NAME=7, FLASH_KLUDGE=60, OST=80, TEAPOT=90)
 lengths = enum(COMMAND=1, GETPOINT=24, STARTCAL=8, ADDPOINT=16, NAME=1, OST=4, TEAPOT=1)
 
 class ConnHandler(Thread):
@@ -23,7 +23,7 @@ class ConnHandler(Thread):
         global cmds
 
         self.server = server
-        self.logger = logging.getLogger("")
+        self.logger = logging.getLogger("ConnHandler%s" % str(addr))
         self.conn = conn
         self.addr = addr
         self.listen = False
@@ -31,14 +31,15 @@ class ConnHandler(Thread):
 
         self.protocol = {
             cmds.GETPOINT: self.getPoint,
-            #cmds.STARTCAL: self.startCal,
-            #cmds.ADDPOINT: self.addPoint,
-            #cmds.CLEAR: self.clearCal,
-            #cmds.ENDCAL: self.endCal,
+            cmds.STARTCAL: self.startCal,
+            cmds.ADDPOINT: self.addPoint,
+            cmds.CLEAR: self.clearCal,
+            cmds.ENDCAL: self.endCal,
             cmds.UNAVALIABLE: self.unavaliable,
             cmds.NAME: self.sendName,
             cmds.OST: self.sayCheese,
             cmds.TEAPOT: self.IAmATeapot,
+            cmds.FLASH_KLUDGE: self.getPoint
 
             }#TODO Fill with functions for great justice.
 
@@ -54,24 +55,25 @@ class ConnHandler(Thread):
         global cmds
         global lengths
 
-        self.logger.info("\t\t\tStarting new thread!")
+        self.logger.info("Starting new thread!")
         self.sendName()
         while not (self.stop or self.server.shutdown):
             try:
                 data = self.conn.recieve(lengths.COMMAND)
             except error:
-                self.panic()
+                self.panic("Error on recieve of command.")
                 
             if len(data) < lengths.COMMAND:
                continue
             command = struct.unpack("!B", data)[0]
+            self.logger.info("Says %d" % (command))
             self.protocol.get(command, self.unavaliable)()
 
     
     # Panic method.
     # If an error is found on the network, call this and let it handle it "gracefully".
-    def panic(self):
-        self.logger.info("\t\t\tO NOES! FRIEND %s DONT LEIK ME ANYMORE!" % str(self))
+    def panic(self, what="FAT"):
+        self.logger.info("O NOES! FRIEND %s DONT LEIK ME ANYMORE!\n\t IT SAID I WAS %s!" % (str(self), what))
         self.server.handlersLock.acquire()
         try:
             del self.server.handlers[self]
@@ -85,68 +87,87 @@ class ConnHandler(Thread):
         try:
             self.conn.send(data)
         except error:
-            self.panic()
+            self.panic("Error on send of %s" % data)
 
     # Sends a signal to the other side, that the command they attempted to use is unavailiable at this time.
     # Panics if error if found on send.
     def unavaliable(self):
-        try:
-            self.conn.send(struct.pack("!B", cmds.UNAVALIABLE))
-        except error:
-            self.panic()
+        self.send(struct.pack("!B", cmds.UNAVALIABLE))
 
     def getPoint(self):
         global lengths
         try:
             self.conn.recieve(lengths.GETPOINT)
+            self.send(struct.pack("!B2dq", 1, 0, 0, 0))
         except error:
-            self.panic()
+            self.panic("Error on read of getPoint")
         self.listen = not self.listen
 
     def startCal(self):
         global lengths
-        data = ""
+        self.logger.info("STARTCAL")
         try:
             data = self.conn.recieve(lengths.STARTCAL)
         except error:
-            self.panic()
+            self.panic("Error on read of startCal")
 
         if not len(data) == lengths.STARTCAL:
-            returns
-        angle = struct.unpack("!q", data)[0]
-        if not self.server.eyetracker.startCalibration(angle):
+            self.logger.error("Not correct length read for STARTCAL")
+            return
+        angle = struct.unpack("!d", data)[0]
+        self.logger.debug("Angle: %d" % angle)
+        if self.server.eyetracker.startCalibration(angle):
+            self.send(struct.pack("!Bd", cmds.STARTCAL, angle))
+        else:
             self.unavaliable()
 
     def addPoint(self):
-        if not self.server.eyetracker.addPoint():
+        global lengths
+        global cmds
+        data = ""
+        try:
+            data = self.conn.recieve(lengths.ADDPOINT)
+        except error:
+            self.panic("Error on read of addPoint")
+
+        if not len(data) == lengths.ADDPOINT:
+            self.logger.error("Not correct length read for ADDPOINT")
+            return
+        point = struct.unpack("!2d", data)
+        if self.server.eyetracker.addPoint(point[0], point[1]):
+            self.send(struct.pack("!B", cmds.ADDPOINT) + data)
+
+        else:
             self.unavaliable()
 
     def clearCal(self):
-        if not self.server.eyetracker.clearCalibration():
+        if self.server.eyetracker.clearCalibration():
+            self.send(struct.pack("!B", cmds.CLEARCAL))
+        else:
             self.unavaliable()
 
     def endCal(self):
-        if not self.server.eyetracker.endCalibration():
+        if self.server.eyetracker.endCalibration():
+            self.send(struct.pack("!B", cmds.ENDCAL))
+        else:
             self.unavaliable()
 
     def sendName(self):
-        try:
-            self.conn.send(struct.pack("!2B", cmds.NAME, self.server.eyetracker.name))
-
-        except error:
-            self.panic()
+        self.send(struct.pack("!2B", cmds.NAME, self.server.eyetracker.name))
 
     def sayCheese(self):
-        try:
-            self.conn.send("Appenzeller")
-        except error:
-            self.panic()
+        self.send("Appenzeller")
 
     def IAmATeapot(self):
+        self.send("418 I am a teapot!")
+
+    def Flash_Kludge(self):
         try:
-            self.conn.send("418 I am a teapot!")
+            data = self.conn.recieve(lengths.FLASH_KLUDGE)
         except error:
-            self.panic()
+            self.panic("Error on read of flashkludge")
+
+        self.send('<?xml version="1.0"?><cross-domain-policy><allow-access-from domain="*" to-ports="*" ></cross-domain-policy>\0')
 
 class ETServer(object):
     def __init__(self, addr, name="ETServer"):
