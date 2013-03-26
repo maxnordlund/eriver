@@ -12,8 +12,9 @@ $(function() {
 		
 		var dom = $('<div>', {id: 'orb' + (OrbCount++)}).addClass('orb');
 		var after = $('<div>').css('transition', 'all 0.3s');
+
 		dom.append(after);
-		$(document.body).append(dom);
+		$(document.body).prepend(dom);
 		
 		this.dom = dom;
 		this.id = '#' + dom.id;
@@ -86,20 +87,55 @@ $(function() {
 		})();
 	}
 	
-	window.Orb = Orb;
+	var popup = (function() {
+		var popup = $('#contents');
+		/*return {
+			content: 
+		}*/
+		popup.content = function(string) {
+			var replacement = $('#'+string+'.template');
+			popup.css('height', replacement.innerHeight());
+			popup.html(replacement.html());
+		};
+		return popup;
+	})();
+
+	//window.Orb = Orb;
 
 	var orb = new Orb();
-	var ready = true;
-
 	var testPoint = {x: 0.5, y: 0.5};
 	var calibrationPoints = [{x:0.1, y:0.1},
 		{x:0.9, y:0.1}, {x:0.5, y:0.5}, {x:0.9, y:0.9},
 		{x:0.1, y:0.9}];
+	var _currPoints;
 	
+
+
+/* HASH EXTRAS */
+	var hashMod = function() {
+		if (location.hash.indexOf("#david") == 0) {
+			orb.after.addClass('davido');
+		} else {
+			orb.after.removeClass('davido');
+		}
+
+		if (location.hash.indexOf("#andr") == 0) {
+			orb.after.addClass('andreaso');
+		} else {
+			orb.after.removeClass('andreaso');
+		}
+	}
+	window.onhashchange = hashMod;
+	hashMod();
+
+	var timeouts = [];
+
 	var socket = io.connect(location.protocol+'//'+location.host);
 
 	socket.on('connect', function() {
-		socket.emit('name', location.pathname.slice(-1));
+		parts = location.pathname.split("/");
+		num = parts[parts.length-1];
+		socket.emit('name', num);
 	});
 
 	socket.on('name', function() {
@@ -108,12 +144,13 @@ $(function() {
 	});
 
 	socket.on('unavailable', function() {
-		/*
-		setTimeout(function () {
-			socket.emit('name', location.pathname.slice(-1));
-		}, 2500); // TODO lower delay?
-		*/
-		location.reload();
+		socket.disconnect();
+		$('.popup').hide();
+		$('#unavailable').show();
+
+		timeouts.forEach(function(v) {
+			clearTimeout(v);
+		});
 	});	
 
 	socket.on('disconnect', function() {
@@ -123,7 +160,10 @@ $(function() {
 		var popup = $('#connecting');
 		popup.find('h2').css('color', 'red').text('Reconnecting...');
 		popup.show();
-
+		timeouts.forEach(function(v) {
+			console.log(v);
+			clearTimeout(v);
+		});
 	});
 
 	socket.on('getPoint', function(point) {
@@ -137,16 +177,51 @@ $(function() {
 
 	/* DEMO method, DELETE */
 	$('.popup input[type="button"]').click(function(e) {
-		if (ready) {
-			e.stopPropagation();
-			$(this).parent().hide();
-			
-			socket.emit('startCal', {angle: parseFloat($('#angle').attr('value'))});
+		e.stopPropagation();
+		$(this).parent().hide();
 		
-			socket.on('startCal', calibrate);
-		}
-	});
+		socket.emit('startCal', {angle: parseFloat($('#angle').val())});
 	
+		socket.on('startCal', calibrate);
+	});
+
+	socket.on('addPoint', function() {
+		orb.expand();
+		setTimeout(function() {
+			updateOrb(_currPoints);
+		}, 500);
+	});
+
+	var updateOrb = function(list) {
+		if (list.length == 0) {
+			orb.moveTo(testPoint.x, testPoint.y);
+			socket.emit('endCal');
+
+			timeouts.push(setTimeout(function() {
+				orb.contract();
+
+				setTimeout(function() {
+					socket.emit('getPoint'); //start getPoint
+					socket.emit('getPoint'); //end getPoint
+					$(orb.dom).hide();
+					$('#complete').show();
+				}, 500);
+			}, 1000));
+
+		} else {
+			point = _currPoints.shift();
+
+			orb.moveTo(point.x, point.y);
+
+			setTimeout(function() {
+				orb.contract();
+				setTimeout(function() {
+					socket.emit('addPoint', point);
+				}, 400);
+			}, 1000);
+		}
+	}
+
 	/* DEMO function, DELETE */
 	var calibrate = function() {
 		var flexWait = orb.time * 6;
@@ -156,9 +231,12 @@ $(function() {
 		
 		var totalTime = moveWait + flexWait + extra;
 
-		//$('#back').hide();
 		$(orb.dom).show();
-		
+
+		_currPoints = calibrationPoints.slice();
+
+		updateOrb(_currPoints);
+/*
 		calibrationPoints.forEach(function(point, index) {
 			setTimeout(function() {
 				orb.moveTo(point.x, point.y);
@@ -172,20 +250,23 @@ $(function() {
 			}, totalTime*index);
 		});
 
-		setTimeout(function() {
+		timeouts.push(setTimeout(function() {
 			orb.moveTo(testPoint.x, testPoint.y);
 
 			socket.emit('endCal');
 
-			setTimeout(function() {
+			timeouts.push(setTimeout(function() {
 				socket.emit('getPoint'); //start getPoint
 				socket.emit('getPoint'); //end getPoint
 				$(orb.dom).hide();
 				$('#complete').show();
 				//$('#back').show();
-			}, 1000);
-		}, totalTime*5);
+			}, 1000));
+		}, totalTime*5));
+*/
 	}
 	
 	window.orb = orb;
+	window.popup = popup;
+	window.socket = socket;
 });

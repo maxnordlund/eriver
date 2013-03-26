@@ -33,28 +33,34 @@ app.configure ->
       # .set('compress', true)
         .use(nib())
 
-app.get "/", (req, res) -> 
+app.get "/", (req, res) ->
   ets = ((etmanager.get id) for id in [0...config.ets.length])
   console.log ets
   res.render "status"
     ets: ets
 
 app.get "/calibrate", (req, res) -> 
-  res.render "status",
-    ips: config.ets
+  ets = ((etmanager.get id) for id in [0...config.ets.length])
+  console.log ets
+  res.render "status"
+    ets: ets
 
 app.get "/calibrate/:num", (req, res) ->
   num = req.params.num
   et = etmanager.get num
-  if et?
+  if et? && et.available
     if et.cal
       res.render "unavailable",
         et
     else
       res.render "calibrate"
     #TODO
+  else if et?
+    et.id = num
+    res.render "unavailable",
+      et
   else
-    et = 
+    et =
       id: num,
       cal: false
     res.render "unavailable",
@@ -89,9 +95,13 @@ app.get "/stats/:num.json", (req, res) ->
 io.sockets.on "connection", (socket) ->
 
   socket.on "name", (id) ->
+    console.log "main: socket.on 'name'"
     et = etmanager.get id
     if et?
-      etmanager.pair id, socket
-      socket.emit "name", id
+      success = etmanager.pair id, socket
+      if success
+        socket.emit "name", id
+      else
+        socket.emit "unavailable"
     else
       socket.emit "unavailable"

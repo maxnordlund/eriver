@@ -10,46 +10,84 @@ body {
 	margin: 0;
 	height: 100%;
 	font-family: "Iceland","Tahoma","Verdana","Arial","sans-serif";
+
+	text-align: center;
+
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	cursor: default;
 }
 
-a {
-	background-color: #066;
-	color: white;
-	font-size: 24px;
-	padding: 5px 25px 5px 20px;
-	line-height: 25px;
-	text-decoration: none;
-	border-bottom-right-radius: 20px 55px;
-	border-right: 1px solid #399;
-	border-bottom: 1px solid #399;
-	box-shadow: 0 0 15px #0ff;
-}
-
-a:hover {
-	background-color: #077;
-	box-shadow: 0 0 25px #0ff;
-}
-
-.popup {
-	position: relative;
-	padding: 15px;
-	border-radius: 15px;
-	width: 300px;
-	top: 200px;
-	margin: -65px auto 0 auto;
+.popup, #popup {
+	margin: 65px auto 0 auto;
 	background-color: white;
 	text-align: center;
 	border: 1px solid #555;
-	box-shadow: 0 0 35px white;
+
+	transition: all 1s;
+	-webkit-transition: all 1s;
+	-moz-transition: all 1s;
+}
+
+.popup {
+	width: 300px;
+}
+
+#popup {
+	position: relative;
+	display: inline-block;
+	background-color: white;
+	clear: both;
+}
+
+#main {
+	float: left;
+	padding-bottom: 15px;
+	height: 100%;
+	border-right: 1px gray solid;
+
+	transition: all 1s;
+	-webkit-transition: all 1s;
+	-webkit-transition: height 1s;
+}
+
+#side {
+	float: right;
+  background-color: green;
+  height: 100%;
+  width: 50px;
+  overflow: hidden;
+  -webkit-transition: width 1s;
 }
 
 #status.popup {
 	width: 500px;
 }
 
-.popup .logo {
-	background-image: radial-gradient(gray, transparent 70%);
-	background-image: -webkit-radial-gradient(gray, transparent 70%);
+.popup div.logo, #popup .logo {
+	width: 100%;
+	height: 100px;
+	background-color: #ccc;
+	border-bottom: 1px solid #999;
+
+	margin-bottom: 15px;
+
+	background-image: url(/img/eriver_logo.png);
+	background-position: bottom;
+	background-repeat: no-repeat;
+}
+
+#contents {
+	width: 300px;
+	overflow: hidden;
+
+	transition: all 0.25s;
+	-webkit-transition: all 0.25s;
+	-moz-transition: all 0.25s;
 }
 
 .popup h2 {
@@ -83,74 +121,120 @@ a:hover {
 }
 
 .popup input[type="button"] {
-	border: 1px solid white;
 	background-color: #088;
 	color: white;
 	font-family: "Iceland","Tahoma","Verdana","Arial","sans-serif";
 	padding: 5px 15px;
 	font-size: 24px;
-	border-radius: 5px;
-	box-shadow: 0 0 5px #066;
+	box-shadow: 0 -1px 0 #066;
+
+	border-radius: 2px;
+	border: 1px solid white;
+	outline: 1.5px solid #088;
+}
+
+:focus {
+	outline: none;
 }
 
 .popup input[type="button"]:hover {
 	background-color: #099;
-	box-shadow: 0 0 15px #088;
+	outline: 1.5px solid #099;
 }
 
 .popup input[type="button"]:active {
 	background-color: #033;
-	box-shadow: 0 0 15px #033;
 }
 
 .orb {
-	position: absolute;
-	margin: -50px 0 0 -50px;
-	width: 100px;
-	height: 100px;
+	position: fixed;
+	margin: -40px 0 0 -40px;
+	width: 80px;
+	height: 80px;
 	
 	transition: all 0.5s;
 	-webkit-transition: all 0.5s;
 	-moz-transition: all 0.5s;
 }
 
+.template {
+	display: none;
+}
+
 .orb div {
 	content: "";
 	position: absolute;
-	width: 100px;
-	height: 100px;
+	width: 80px;
+	height: 80px;
 	border-radius: 50%;
 	background-color: red;
 	background-image: radial-gradient(red, rgb(0, 50, 50));
 	background-image: -webkit-radial-gradient(red, rgb(0, 50, 50));
 	background-image: -moz-radial-gradient(red, rgb(0, 50, 50));
-	/*background-image: url(/img/davido.png);*/
 	background-size: cover;
 }
 
-@keyframes flex {
-  from {
-    transform: scale(1.0);
-  }
-  to {
-    transform: scale(0.3);
-  }
+.orb div.davido {
+	background-color: transparent;
+	background-image: url(/img/davido.png);
 }
 
-@-webkit-keyframes flex {
-  from {
-    -webkit-transform: scale(1.0);
-  }
-  to {
-    -webkit-transform: scale(0.3);
-  }
+.orb div.andreaso {
+	background-color: transparent;
+	background-image: url(/img/andreaso.png);
 }
 
-@-moz-keyframes flex {
-  from {
-    -moz-transform: scale(1.0);
-  }
-  to {
-    -moz-transform: scale(0.3);
-  }
+#unavailable {
+	width: 400px;
+}
+
+.availability {
+	text-align: center;
+	margin-top: 50px;
+}
+
+.availability h1 {
+	color: white;
+}
+
+.etStatus {
+	display: block;
+	padding: 15px;
+	width: 300px;
+	top: 200px;
+	margin: 15px auto 0 auto;
+	background-color: white;
+	text-align: center;
+	text-decoration: none;
+	border: 1px solid #555;
+	color: black;
+	clear: both;
+
+	transition: all 0.1s;
+	-webkit-transition: all 0.1s;
+	-moz-transition: all 0.1s;
+}
+
+.etStatus:hover {
+	-webkit-transform: scale(1.1);
+	-moz-transform: scale(1.1);
+	transform: scale(1.1);
+}
+
+.etStatus .id {
+	width: 20px;
+	float: left;
+}
+
+.etStatus.available {
+}
+
+.etStatus.unavailable {
+	background-color: gray;
+	color: dim-gray;
+}
+
+.etStatus.unavailable .info {
+	float: right;
+	color: maroon;
 }

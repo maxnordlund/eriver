@@ -2,19 +2,43 @@
 html
   head
     meta(name='charset', content='utf-8')
+    meta(name='apple-mobile-web-app-capable', content='yes')
+    meta(name='viewport', content='user-scalable=0, initial-scale=1.0')
     title Calibrate ET
-    //link(href='/style/iceland.woff', rel='stylesheet', type='text/css')
+    //- link(href='/style/iceland.woff', rel='stylesheet', type='text/css')
     link(href='/style/calibrate.css', rel='stylesheet', type='text/css')
     script(src='/script/jquery.min.js')
     script(src='/socket.io/socket.io.js')
+    //-script(src='/script/calibrate.js')
+    script(src='/script/calibrate-new.js')
   body
-    // a(id='back', href='/') Back
-    #connecting.popup
-      img.logo(src='/img/eriver_logo.png', height='70px')
+    //- a(id='back', href='/') Back
+    #popup
+      #main
+        .logo
+        #contents(style='height: 0px')
+      #side
+
+    #connecting.template
+      h2 Connecting to server.
+      img(src='/img/ajax-loader.gif')
+
+    #none.template
+
+    #prepare.template
+      h2 Prepare to calibrate.
+      label
+        | Angle:
+        input(type='number', value='90', id='angle')
+        | deg
+      input(type='button', value='Calibrate')
+
+  //-  #connecting.popup
+      .logo
       h2 Connecting to server.
       img(src='/img/ajax-loader.gif')
     #prepare.popup(style='display: none;')
-      img.logo(src='/img/eriver_logo.png', height='70px')
+      .logo
       h2 Prepare to calibrate.
       label
         | Angle:
@@ -28,4 +52,10 @@ html
       h2 Calibration completed.
       div(class='errorsize', style='display:none')
       div(class='errortext')
-    script(src='/script/calibrate.js')
+    #unavailable.popup(style='display: none;')
+      .logo
+      h2.error Eye tracker unavailable.
+      p
+       | The eye tracker you have requested is not available.
+       | Please make sure that it is powered on and properly connected
+       | to the eRiver server.

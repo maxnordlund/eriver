@@ -3,14 +3,25 @@ html
   head
     meta(name='charset', content='utf-8')
     title ET Status
-    link(rel='stylesheet', type='text/css', href='/style/calibrate.css')
-    link(href='http://fonts.googleapis.com/css?family=Iceland:400,700', rel='stylesheet', type='text/css')
-    script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js')
+    link(href='/style/calibrate.css', rel='stylesheet', type='text/css')
+    script(src='/script/jquery.min.js')
+    script(src='/script/status.js')
   body
-    #status.popup
-      img.logo(src='/img/eriver_logo.png', height='70px')
-      h2 ET Status
-      //- - for ip in ips
-        p id: #{ips.indexOf(ip)} - ip: #{ip} 
-        //- #{et.cal}, Getting: #{et.getting} 
-        //- ID, IP, connected?, canbecalibrated? (cal) 
+    img(src='/img/eriver_logo.png', margin-top='10px')
+    .availability
+      h1 ET Status
+      - for (var i = 0; i < ets.length; i++) {
+        - if (ets[i].available && !ets[i].cal) {
+          a.etStatus.available(href="/calibrate/#{i}#")
+            .id #{ets[i].id}
+            .ip #{ets[i].ip}
+        - } else {
+          .etStatus.unavailable
+            .id #{ets[i].id}
+            - if (ets[i].cal) {
+              .info Calibrating
+            - }
+            .ip #{ets[i].ip}
+        - }
+      - }
+
