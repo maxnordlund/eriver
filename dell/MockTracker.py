@@ -63,5 +63,5 @@ class MockTracker(EyeTracker):
             if self.active:
                 #print("Active!")
                 self.callETEvent(event)
-            time.sleep(1/self.fps)
+            time.sleep((1/float(self.fps))
     
