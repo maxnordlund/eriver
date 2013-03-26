@@ -39,7 +39,7 @@ class ConnHandler(Thread):
             cmds.NAME: self.sendName,
             cmds.OST: self.sayCheese,
             cmds.TEAPOT: self.IAmATeapot,
-            cmds.FLASH_KLUDGE: self.getPoint
+            #cmds.FLASH_KLUDGE: self.getPoint
 
             }#TODO Fill with functions for great justice.
 
@@ -62,6 +62,7 @@ class ConnHandler(Thread):
                 data = self.conn.recieve(lengths.COMMAND)
             except error:
                 self.panic("Error on recieve of command.")
+                return
                 
             if len(data) < lengths.COMMAND:
                continue
@@ -98,9 +99,9 @@ class ConnHandler(Thread):
         global lengths
         try:
             self.conn.recieve(lengths.GETPOINT)
-            self.send(struct.pack("!B2dq", 1, 0, 0, 0))
         except error:
             self.panic("Error on read of getPoint")
+            return
         self.listen = not self.listen
 
     def startCal(self):
@@ -110,6 +111,7 @@ class ConnHandler(Thread):
             data = self.conn.recieve(lengths.STARTCAL)
         except error:
             self.panic("Error on read of startCal")
+            return
 
         if not len(data) == lengths.STARTCAL:
             self.logger.error("Not correct length read for STARTCAL")
@@ -129,6 +131,7 @@ class ConnHandler(Thread):
             data = self.conn.recieve(lengths.ADDPOINT)
         except error:
             self.panic("Error on read of addPoint")
+            return
 
         if not len(data) == lengths.ADDPOINT:
             self.logger.error("Not correct length read for ADDPOINT")
