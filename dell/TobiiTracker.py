@@ -25,7 +25,15 @@ class MockTracker(EyeTracker):
         pass
 
     def startCalibration(self, angle):
-        return False
+        lock = threading.Lock()
+
+        #Does this work? YES IT DOES!
+        def start_calibrator(event_type, event_name, eyetracker_info):
+            lock.release()
+        
+        lock.acquire() #asynchronous to synchronous
+        browser = self.et.StartCalibration(self, callback=startcalibrator)
+        lock.acquire()
 
     def endCalibration(self):
         return False
@@ -53,11 +61,20 @@ class MockTracker(EyeTracker):
 
         lock = threading.Lock()
 
-        #Does this work?
+        #Does this work? YES IT DOES!
         def etlooker(event_type, event_name, eyetracker_info):
-            lock.release()
-            pass
-        lock.acquire()
+            if event_type == etio.EyetrackerBrowser.FOUND:
+                if eyetracker_info.status == "ok"
+                    self.et = 
+                    lock.release()
+                
+            elif event_type == etio.EyetrackerBrowser.UPDATED:
+                pass
+            elif event_type == etio.EyetrackerBrowser.REMOVED:
+                pass
+            
+        
+        lock.acquire() #asynchronous to synchronous
         browser = etio.browsing.EyetrackerBrowser(self.mainloop, etlooker)
         lock.acquire()
         lock.release()
