@@ -3,8 +3,6 @@ def default_onETEvent(etevent):
     pass
 
 class EyeTracker(object):
-    #Register onETEvent handlers
-    #enable
 
     def __init__(self):
         self.listeners = []
@@ -22,6 +20,7 @@ class EyeTracker(object):
     # Can be overrided if the data should be manipulated before client use
     # or if extra side effects should be performed.
     def callETEvent(self, etevent):
+
         for callback in self.listeners:
             callback(etevent)
 
@@ -83,7 +82,6 @@ class EyeTracker(object):
     # callback is called with name, *args and **kwargs when the operation is completed.
     def getName(self, callback, *args, **kwargs):
         callback(0, *args, **kwargs)
-
 
     # Gives a set of rates for which the tracker supports delivery of ETEvent.
     # Common values include 24, 25 30, 60 and 120.
