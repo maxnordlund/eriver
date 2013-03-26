@@ -26,7 +26,7 @@ class MockTracker(EyeTracker):
     def getState(self):
         return 0 + self.active + (self.calibrating << 1)
 
-    def startCalibration(self):
+    def startCalibration(self, angle):
         self.calibrating=True
         return True # Does not really support it, but fakes it.
 
@@ -63,5 +63,5 @@ class MockTracker(EyeTracker):
             if self.active:
                 #print("Active!")
                 self.callETEvent(event)
-            time.sleep(1/self.fps)
+            time.sleep((1/float(self.fps))
     
