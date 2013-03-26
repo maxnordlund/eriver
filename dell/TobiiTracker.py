@@ -19,10 +19,12 @@ class MockTracker(EyeTracker):
        self.thread.start()       
 
     def enable(self, yes=True):
+        pass
 
     def getState(self):
+        pass
 
-    def startCalibration(self):
+    def startCalibration(self, angle):
         return False
 
     def endCalibration(self):
@@ -41,17 +43,16 @@ class MockTracker(EyeTracker):
         return set([0])
 
     def getRate(self):
-        et.etFramerate
+        et.etFramerate()
         
     def setRate(self, rate):
         pass
 
-    def run(self):
-        eventhandler = def f(event):
-            
+    def etlooker(self):
+        
 
-            
-        browser = etio.browsing.EyetrackerBrowser(self.mainloop, eventhandler)
+    def run(self):
+        browser = etio.browsing.EyetrackerBrowser(self.mainloop, self.etlooker)
         while self.running:
             
             
