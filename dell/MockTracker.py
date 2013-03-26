@@ -58,7 +58,7 @@ class MockTracker(EyeTracker):
 
     def run(self):
         print("Starting generation of points!")
-        for event in MockTracker.circle_generator(radius=0.2, offset=(0.5, 0.5)):
+        for event in self.circle_generator(radius=0.2, offset=(0.5, 0.5)):
             #print("ETDATA!" + str(self.active))
             if self.active:
                 #print("Active!")
