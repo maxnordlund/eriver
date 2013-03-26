@@ -49,7 +49,7 @@ class MockTracker(EyeTracker):
     def setRate(self, rate):
         self.fps = rate
 
-    def circle_generator(radius=1, offset=(0,0), step=0.01, start=0, stop=None):
+    def circle_generator(self, radius=1, offset=(0,0), step=0.01, start=0, stop=None):
         t=start
         while stop==None or t<stop:
             #yield ETEvent(0.5, 0.5, 0)
