@@ -3,6 +3,8 @@ def default_onETEvent(etevent):
     pass
 
 class EyeTracker(object):
+    #Register onETEvent handlers
+    #enable
 
     def __init__(self):
         self.listeners = []
@@ -28,7 +30,7 @@ class EyeTracker(object):
     def enable(self, callback, *args, **kwargs):
         raise NotImplementedError
 
-    # Set if the tracker should be active or not.
+    # Set if the tracker should be inactive.
     # This might shutdown the tracker if the implementation wants to.
     # callback is called with a result, *args and **kwargs when the operation is completed.
     def disable(self, callback, *args, **kwargs):
@@ -81,6 +83,7 @@ class EyeTracker(object):
     # callback is called with name, *args and **kwargs when the operation is completed.
     def getName(self, callback, *args, **kwargs):
         callback(0, *args, **kwargs)
+
 
     # Gives a set of rates for which the tracker supports delivery of ETEvent.
     # Common values include 24, 25 30, 60 and 120.
