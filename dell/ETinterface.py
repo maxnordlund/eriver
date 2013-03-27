@@ -23,7 +23,7 @@ class EyeTracker(object):
 
     # Set if the tracker should be active or not.
     # This might shutdown the tracker if the implementation wants to.
-    # callback is called with *args and **kwargs when the operation is completed.
+    # callback is called with a result, *args and **kwargs when the operation is completed.
     def enable(yes=True, callback, *args, **kwargs):
         raise NotImplementedError
 
@@ -89,7 +89,7 @@ class EyeTracker(object):
     # Sets the tracker rate to the given value.
     # The value given should be among those returned from getRates, excluding -1.
     # callback is called with result, *args and **kwargs when the operation is completed.
-    # result is True if the change was successfull.
+    # result is the rate that is set.
     def setRate(self, rate, callback, *args, **kwargs):
         raise NotImplementedError
 
