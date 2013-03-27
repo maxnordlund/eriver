@@ -19,8 +19,12 @@ class MockTracker(EyeTracker):
         
         proc.start()
 
-    def enable(yes=True, callback, *args, **kwargs):
-        self.active = yes
+    def enable(self, callback, *args, **kwargs):
+        self.active = True
+        callback(True, *args, **kwargs)
+
+    def disable(self, callback, *args, **kwargs):
+        self.active = False
         callback(True, *args, **kwargs)
 
     def getState(self, callback, *args, **kwargs):
