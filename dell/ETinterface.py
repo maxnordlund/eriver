@@ -4,7 +4,8 @@ def default_onETEvent(etevent):
 
 class EyeTracker(object):
 
-    self.listeners = set()
+    def __init__(self):
+        self.listeners = set()
 
     # Register an callback to be called when ETEvents is recieved from the tracker.
     # callback is called like this:
