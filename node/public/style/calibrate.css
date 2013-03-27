@@ -55,11 +55,29 @@ body {
 	-webkit-transition: height 1s;
 }
 
+#contents {
+	width: 300px;
+	overflow: hidden;
+	display: inline-block;
+
+	transition: all 0.25s;
+	-webkit-transition: all 0.25s;
+	-moz-transition: all 0.25s;
+}
+
+#contents > div {
+	width: 300px;
+}
+
 #side {
 	float: right;
+  /*
   background-color: green;
+	*/
+  background-position: center right;
+  background-repeat: no-repeat;
+
   height: 100%;
-  width: 50px;
   overflow: hidden;
   -webkit-transition: width 1s;
 }
@@ -81,46 +99,37 @@ body {
 	background-repeat: no-repeat;
 }
 
-#contents {
-	width: 300px;
-	overflow: hidden;
-
-	transition: all 0.25s;
-	-webkit-transition: all 0.25s;
-	-moz-transition: all 0.25s;
-}
-
-.popup h2 {
+.popup h2, #popup h2 {
 	margin: 10px 0 20px 0;
 	font-weight: normal;
 	font-size: 30px;
 	color: #555;
 }
 
-.popup h2.error {
+.popup h2.error, #popup h2.error {
 	margin: 10px 0 20px 0;
 	font-weight: normal;
 	font-size: 30px;
 	color: red;
 }
 
-.popup .errorsize {
+.errorsize, .errorRing {
 	border-radius: 50%;
 	border: 1px solid;
 	border-color: #066;
 	margin: 20px auto 10px auto;
 }
 
-.popup label {
+.popup label, #popup label {
 	display: block;
 }
 
-.popup input[type="number"] {
+.popup input[type="number"], #popup input[type="number"] {
 	margin: 0 0 20px 10px;
 	width: 40px;
 }
 
-.popup input[type="button"] {
+.popup input[type="button"], #popup input[type="button"] {
 	background-color: #088;
 	color: white;
 	font-family: "Iceland","Tahoma","Verdana","Arial","sans-serif";
@@ -137,12 +146,12 @@ body {
 	outline: none;
 }
 
-.popup input[type="button"]:hover {
+.popup input[type="button"]:hover, #popup input[type="button"]:hover {
 	background-color: #099;
 	outline: 1.5px solid #099;
 }
 
-.popup input[type="button"]:active {
+.popup input[type="button"]:active, #popup input[type="button"]:active {
 	background-color: #033;
 }
 
@@ -159,6 +168,7 @@ body {
 
 .template {
 	display: none;
+	width: 300px;
 }
 
 .orb div {
@@ -232,6 +242,7 @@ body {
 .etStatus.unavailable {
 	background-color: gray;
 	color: dim-gray;
+	cursor: default;
 }
 
 .etStatus.unavailable .info {
