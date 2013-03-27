@@ -20,7 +20,6 @@ class EyeTracker(object):
     # Can be overrided if the data should be manipulated before client use
     # or if extra side effects should be performed.
     def callETEvent(self, etevent):
-
         for callback in self.listeners:
             callback(etevent)
 
@@ -28,7 +27,7 @@ class EyeTracker(object):
     # callback is called with a result, *args and **kwargs when the operation is completed.
     def enable(self, callback, *args, **kwargs):
         raise NotImplementedError
-
+    
     # Set if the tracker should be inactive.
     # This might shutdown the tracker if the implementation wants to.
     # callback is called with a result, *args and **kwargs when the operation is completed.
