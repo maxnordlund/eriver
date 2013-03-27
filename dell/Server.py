@@ -119,10 +119,15 @@ class ConnHandler(Thread):
             return
         angle = struct.unpack("!d", data)[0]
         self.logger.debug("Angle: %d" % angle)
-        if self.server.eyetracker.startCalibration(angle):
-            self.send(struct.pack("!Bd", cmds.STARTCAL, angle))
-        else:
-            self.unavaliable()
+
+        def on_startcal(res)
+            if res:
+                self.send(struct.pack("!Bd", cmds.STARTCAL, angle))
+            else:
+                self.unavaliable()
+        
+        self.server.eyetracker.startCalibration(angle, on_startcal)
+        
 
     def addPoint(self):
         global lengths
@@ -138,26 +143,38 @@ class ConnHandler(Thread):
             self.logger.error("Not correct length read for ADDPOINT")
             return
         point = struct.unpack("!2d", data)
-        if self.server.eyetracker.addPoint(point[0], point[1]):
-            self.send(struct.pack("!B", cmds.ADDPOINT) + data)
 
-        else:
-            self.unavaliable()
+        def on_addpoint(res):
+            if res:
+                self.send(struct.pack("!B", cmds.ADDPOINT) + data)
+
+            else:
+                self.unavaliable()
+    
+        self.server.eyetracker.addPoint(point[0], point[1], on_addpoint)
 
     def clearCal(self):
-        if self.server.eyetracker.clearCalibration():
-            self.send(struct.pack("!B", cmds.CLEARCAL))
-        else:
-            self.unavaliable()
+        def on_clear(res):
+            if res:
+                self.send(struct.pack("!B", cmds.CLEARCAL))
+            else:
+                self.unavaliable()
+
+        self.server.eyetracker.clearCalibration(on_clear)
 
     def endCal(self):
-        if self.server.eyetracker.endCalibration():
-            self.send(struct.pack("!B", cmds.ENDCAL))
-        else:
-            self.unavaliable()
+        def on_end(res):
+            if res:
+                self.send(struct.pack("!B", cmds.ENDCAL))
+            else:
+                self.unavaliable()
 
+        self.server.eyetracker.clearCalibration(on_end)
     def sendName(self):
-        self.send(struct.pack("!2B", cmds.NAME, self.server.eyetracker.name))
+        def on_name(name):
+            self.send(struct.pack("!2B", cmds.NAME, name)
+
+        self.server.eyetracker.getName(on_name)
 
     def sayCheese(self):
         self.send("Appenzeller")
@@ -195,9 +212,21 @@ class ETServer(object):
             self.handlersLock.release()
 
     def start(self):
-        if not self.eyetracker.enable():
-            self.logger.critical("WAT? Eye tracker not enablable?")
-        self.logger.debug("Active? %s" % str(self.eyetracker.active))
+
+        lock = threading.Lock() # For syncronization
+
+        def on_enable(res):
+            if not res:
+                self.logger.critical("WAT? Eye tracker not enablable?")
+                self.shutdown = True
+            lock.release()
+
+        self.eyetracker.enable(callback=on_enable)
+                
+        def on_status(res):
+            self.logger.debug("Status? %d" % res)
+
+        self.eyetracker.getState(on_status)
         
         with self.serverSocket: # Start listen and make sure it is closed!
             while not self.shutdown: #Loop until we recive signal of shutdown
