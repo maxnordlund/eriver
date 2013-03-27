@@ -214,7 +214,7 @@ class ETServer(object):
 
     def start(self):
 
-        lock = threading.Lock() # For syncronization
+        lock = Lock() # For syncronization
 
         def on_enable(res):
             if not res:
@@ -222,7 +222,9 @@ class ETServer(object):
                 self.shutdown = True
             lock.release()
 
+        lock.acquire()
         self.eyetracker.enable(callback=on_enable)
+        lock.acquire()
                 
         def on_status(res):
             self.logger.debug("Status? %d" % res)
