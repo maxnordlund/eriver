@@ -9,6 +9,7 @@ import math
 #Thinking about making the calibration set up a polygon that is traced instead.
 class MockTracker(EyeTracker):
     def __init__(self, onETEvent, name=1, fps=60):
+        super(MockTracker).__init__(self)
         self.active=False
         self.calibrating=False
         self.name=name
