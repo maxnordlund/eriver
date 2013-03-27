@@ -5,14 +5,14 @@ def default_onETEvent(etevent):
 class EyeTracker(object):
 
     def __init__(self):
-        self.listeners = set()
+        self.listeners = []
 
     # Register an callback to be called when ETEvents is recieved from the tracker.
     # callback is called like this:
     # callback(ETEvent)
     # No arguments becuase I could not figure out how to store them properly.
     def register_onETEvent(self, callback):
-        self.listeners += callback
+        self.listeners.append(callback)
 
     # This method calls the function variable onETEvent.
     # As the parameter it use the second parameter.
@@ -20,7 +20,7 @@ class EyeTracker(object):
     # Can be overrided if the data should be manipulated before client use
     # or if extra side effects should be performed.
     def callETEvent(self, etevent):
-        for callback in listeners:
+        for callback in self.listeners:
             callback(etevent)
 
     # Set if the tracker should be active.
