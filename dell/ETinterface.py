@@ -11,8 +11,8 @@ class EyeTracker(object):
     # callback is called like this:
     # callback(ETEvent)
     # No arguments becuase I could not figure out how to store them properly.
-    def register_onETEvent(callback):
-        listeners += callback
+    def register_onETEvent(self, callback):
+        self.listeners += callback
 
     # This method calls the function variable onETEvent.
     # As the parameter it use the second parameter.
