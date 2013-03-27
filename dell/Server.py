@@ -20,77 +20,76 @@ def enum(**enums):
 tracker_types = enum(MOCK="MOCK", TOBII="TOBII")
 
 class ETServer(object):
-	def __init__(self, addr, tracker, name="ETServer"):
-		self.shutdown = False # A way for any part of the server to give a shutdown signal
-		
-		self.handlers = dict()# All the handlers of the server
-		self.handlersLock = Lock()# A lock to regulate when parts can use the handlers.
-		
-		self.eyetracker = tracker #We need a tracker aswell.
-		self.eyetracker.register_onETEvent(self.sendData)
-		
-		self.logger = logging.getLogger(name) # A logger is good to have
-		
-		self.serverSocket = TCPHandler(addr, None, True) # Create a server socket for listening to connection attempts
+    def __init__(self, addr, tracker, name="ETServer"):
+        self.shutdown = False # A way for any part of the server to give a shutdown signal
+        
+        self.handlers = dict()# All the handlers of the server
+        self.handlersLock = Lock()# A lock to regulate when parts can use the handlers.
+        
+        self.eyetracker = tracker #We need a tracker aswell.
+        self.eyetracker.register_onETEvent(self.sendData)
+        
+        self.logger = logging.getLogger(name) # A logger is good to have
+        
+        self.serverSocket = TCPHandler(addr, None, True) # Create a server socket for listening to connection attempts
 
-	def sendData(self, etevent):
-		for h in self.handlers.keys():
-			(proc, events) = self.handlers[h]
-			if proc.is_alive():
-				#self.logger.debug(str(h) + str(h.listen))
-				events.put(etevent, False) #Do not block. Either the reciver is ready, or not. Can't wait.
-			else:
-				del self.handlers[h]
-				
+    def sendData(self, etevent):
+        for h in self.handlers.keys():
+            (proc, events) = self.handlers[h]
+            if proc.is_alive():
+                #self.logger.debug(str(h) + str(h.listen))
+                events.put(etevent, False) #Do not block. Either the reciver is ready, or not. Can't wait.
+            else:
+                del self.handlers[h]
+                
 
-	def start(self):
-		lock = Lock() # For syncronization
+    def start(self):
+        lock = Lock() # For syncronization
 
-		def on_enable(res):
-			if not res:
-				self.logger.critical("WAT? Eye tracker not enablable?")
-				self.shutdown = True
-			lock.release()
+        def on_enable(res):
+            if not res:
+                self.logger.critical("WAT? Eye tracker not enablable?")
+                self.shutdown = True
+            lock.release()
 
-		lock.acquire()
-		self.eyetracker.enable(blocking=True, callback=on_enable)
+        lock.acquire()
+        self.eyetracker.enable(blocking=True, callback=on_enable)
 
-		lock.acquire()
-				
-		def on_status(res):
-			self.logger.debug("Status? %d" % res)
+        lock.acquire()
+                
+        def on_status(res):
+            self.logger.debug("Status? %d" % res)
 
-		self.eyetracker.getState(on_status)
-		
-		def QueueWorker(eyetracker, queue):
-			while 1:
-				command = queue.get()
-				eyetracker.__getattribute__(command.cmd)(*command.args, callback=callback)
-		
-		with self.serverSocket: # Start listen and make sure it is closed!
-			cmds = Queue()
-			while not self.shutdown: #Loop until we recive signal of shutdown
-				try:
-					conn, addr = self.serverSocket.accept() #Blockingly accept connections
-					self.logger.info("\t\t\tFRIEND! AWSUM THX!")
-					events = Queue()
-					h = ConnHandler(conn, addr, events, cmds) #Take new connection and fork off a handler
-					proc = Process(target=h.start(), daemon=True).start() #And kick it away!
-					self.handlers[h] = (proc, events)
-				except (error, KeyboardInterrupt) as e:
-					self.shutdown = True #O NOES!
-					for h in self.handlers:
-						h.join() #CAN I HAS SYNCZ?
+        self.eyetracker.getState(on_status)
+        
+        def QueueWorker(eyetracker, queue):
+            while 1:
+                command = queue.get()
+                eyetracker.__getattribute__(command.cmd)(*command.args, callback=callback)
+        
+        with self.serverSocket: # Start listen and make sure it is closed!
+            cmds = Queue()
+            while not self.shutdown: #Loop until we recive signal of shutdown
+                try:
+                    conn, addr = self.serverSocket.accept() #Blockingly accept connections
+                    self.logger.info("\t\t\tFRIEND! AWSUM THX!")
+                    events = Queue()
+                    h = ConnHandler(conn, addr, events, cmds) #Take new connection and fork off a handler
+                    proc = Process(target=h.start(), daemon=True).start() #And kick it away!
+                    self.handlers[h] = (proc, events)
+                except (error, KeyboardInterrupt) as e:
+                    self.shutdown = True #O NOES!
+                    for h in self.handlers:
+                        h.join() #CAN I HAS SYNCZ?
 
-					if isinstance(e, error):
-						self.logger.critical("Unhandled network error in listener.")
-						raise
-					else:
-						self.logger.warning("Server stopped by user.")
-				
+                    if isinstance(e, error):
+                        self.logger.critical("Unhandled network error in listener.")
+                        raise
+                    else:
+                        self.logger.warning("Server stopped by user.")
+                
 
-		self.logger.info("\tPLZ CLOSE EVERYTHING!")
-		
+        self.logger.info("\tPLZ CLOSE EVERYTHING!")
 
 if __name__ == "__main__":
 
@@ -136,7 +135,6 @@ if __name__ == "__main__":
 		tracker = MockTracker(name=options.name)
 	elif tracker_type == tracker_types.TOBII:
 		tracker = TobiiTracker(name=options.name, logger=logging.Logger("TobiiTracker"))
-
 	else:
 		raise ValueError('Invalid tracker type.\n See the help text for more information.')
 	
