@@ -5,22 +5,52 @@ html
     meta(name='apple-mobile-web-app-capable', content='yes')
     meta(name='viewport', content='user-scalable=0, initial-scale=1.0')
     title Calibrate ET
-    //- link(href='/style/iceland.woff', rel='stylesheet', type='text/css')
     link(href='/style/calibrate.css', rel='stylesheet', type='text/css')
     script(src='/script/jquery.min.js')
     script(src='/socket.io/socket.io.js')
-    //-script(src='/script/calibrate.js')
-    script(src='/script/calibrate-new.js')
+    script(src='/script/calibrate.js')
   body
-    //- a(id='back', href='/') Back
     #popup
       #main
         .logo
-        #contents(style='height: 0px')
-      #side
+        #contents
+          //-(style='height: 0px')
+          #connecting.template
+            h2 Connecting to server.
+            img(src='/img/ajax-loader.gif')
 
+          #reconnecting.template
+            h2.error Reconnecting to server.
+            img(src='/img/ajax-loader.gif')
+
+          #none.template
+
+          #prepare.template
+            h2 Prepare to calibrate.
+            label
+              | Angle:
+              input(type='number', value='90', id='angle')
+              | deg
+            input(type='button', value='Calibrate')
+
+          #unavailable.template
+            h2.error Eye tracker ##{id} unavailable.
+            p
+             | The eye tracker you have requested is not available.
+             | Please make sure that it is powered on and properly connected
+             | to the eRiver server.
+          #complete.template
+            h2 Calibration completed.
+            .errorRing
+            .errortext
+      #side
+  //-
     #connecting.template
       h2 Connecting to server.
+      img(src='/img/ajax-loader.gif')
+
+    #reconnecting.template
+      h2.error Reconnecting to server.
       img(src='/img/ajax-loader.gif')
 
     #none.template
@@ -33,7 +63,15 @@ html
         | deg
       input(type='button', value='Calibrate')
 
-  //-  #connecting.popup
+    #unavailable.template
+      h2.error Eye tracker unavailable.
+      p
+       | The eye tracker you have requested is not available.
+       | Please make sure that it is powered on and properly connected
+       | to the eRiver server.
+    img.template(src='/img/eriver_logo.png')
+  //-
+    #connecting.popup
       .logo
       h2 Connecting to server.
       img(src='/img/ajax-loader.gif')
