@@ -21,10 +21,15 @@ class EyeTracker(object):
         for callback, args in listeners:
             callback(etevent, args[0], args[1])
 
+    # Set if the tracker should be active.
+    # callback is called with a result, *args and **kwargs when the operation is completed.
+    def enable(self, callback, *args, **kwargs):
+        raise NotImplementedError
+
     # Set if the tracker should be active or not.
     # This might shutdown the tracker if the implementation wants to.
     # callback is called with a result, *args and **kwargs when the operation is completed.
-    def enable(yes=True, callback, *args, **kwargs):
+    def disable(self, callback, *args, **kwargs):
         raise NotImplementedError
 
     # Allows callers to query the tracker for a statuscode.
