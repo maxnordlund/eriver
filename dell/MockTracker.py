@@ -13,7 +13,7 @@ class MockTracker(EyeTracker):
         self.active=False
         self.calibrating=False
         self.name=name
-        register_onETEvent(onETEvent)
+        self.register_onETEvent(onETEvent)
         self.fps = fps
         
         proc = Thread(target=self.run)
