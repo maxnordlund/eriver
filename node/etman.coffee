@@ -56,6 +56,12 @@ connectTo = (ip) ->
 	socket.on 'error', () ->
 		return
 
+###
+getList = ->
+	for o in etList
+		if 
+###
+
 get = (num) ->
 	if num > ipList.length or num < 0
 		return null
@@ -65,7 +71,6 @@ get = (num) ->
 		ip: 'unknown'
 		cal: false
 		available: false
-		paired: false
 
 	if etList[num]?
 		et = etList[num]
@@ -73,7 +78,6 @@ get = (num) ->
 		o.ip = et.tcp.remoteAddress
 		o.cal = et.cal
 		o.available = true
-		o.paired = et.socket?
 		return o
 	else
 		return o
@@ -112,15 +116,15 @@ dataHandler = (tcp) ->
 
 		switch cmd
 			when CMD.getPoint
-				x = data.readDoubleBE bytes(8)
-				y = data.readDoubleBE bytes(8)
+				x = data.readDoubleBE bytes(4)
+				y = data.readDoubleBE bytes(4)
 				console.log "from TCP:", cmdList[cmd], (x), (y)
 				if sObj.socket?
 					sObj.socket.emit 'getPoint', {x: x, y: y}
 
 			when CMD.startCal
 				if data.length > 4
-					console.log "from TCP:", cmdList[cmd], (data.readDoubleBE bytes(8))
+					console.log "from TCP:", cmdList[cmd], (data.readDoubleBE bytes(1))
 				else
 					console.log "from TCP:", cmdList[cmd]
 				sObj.cal = true
@@ -128,8 +132,10 @@ dataHandler = (tcp) ->
 					sObj.socket.emit 'startCal', {}
 
 			when CMD.addPoint
-				x = data.readDoubleBE bytes(8)
-				y = data.readDoubleBE bytes(8)
+				x = data.readDoubleBE bytes(4)
+				y = data.readDoubleBE bytes(4)
+				#x = data.readDoubleBE 1
+				#y = data.readDoubleBE 9
 				console.log "from TCP:", cmdList[cmd], (x), (y)
 				if sObj.socket?
 					sObj.socket.emit 'addPoint', {x: x, y: y}
@@ -151,6 +157,7 @@ dataHandler = (tcp) ->
 					sObj.socket.emit 'unavailable'
 				
 			when CMD.name
+				#id = data.readUInt8 1
 				id = data.readUInt8 bytes(1)
 				console.log "from TCP:", cmdList[cmd], (id)
 				sObj.id = id
@@ -187,14 +194,12 @@ pair = (num, socket) ->
 			sObj.tcp.write buf
 
 		socket.on "getPoint", ->
-			bytes = do byteMemory
-
 			buf = new Buffer 25
-			buf.writeUInt8 CMD.getPoint, bytes(1)
-			buf.writeDoubleBE 0, bytes(8)
-			buf.writeDoubleBE 0, bytes(8)
-			buf.writeUInt32BE 0, bytes(4)
-			buf.writeUInt32BE 0, bytes(4)
+			buf.writeUInt8 CMD.getPoint, 0
+			buf.writeDoubleBE 0, 1
+			buf.writeDoubleBE 0, 9
+			buf.writeUInt32BE 0, 17
+			buf.writeUInt32BE 0, 21
 
 			console.log "socket.io:", 'getPoint'
 

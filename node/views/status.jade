@@ -4,7 +4,6 @@ html
     meta(name='charset', content='utf-8')
     title ET Status
     link(href='/style/calibrate.css', rel='stylesheet', type='text/css')
-    script(src='/socket.io/socket.io.js')
     script(src='/script/jquery.min.js')
     script(src='/script/status.js')
   body
@@ -12,21 +11,17 @@ html
     .availability
       h1 ET Status
       - for (var i = 0; i < ets.length; i++) {
-        - et = ets[i]
-        - if (et.available && !et.cal && !et.paired) {
-          a.etStatus.available(href="/calibrate/#{i}#", id="#{i+1}")
-            .id #{et.id}
-            .ip #{et.ip}
+        - if (ets[i].available && !ets[i].cal) {
+          a.etStatus.available(href="/calibrate/#{i}#")
+            .id #{ets[i].id}
+            .ip #{ets[i].ip}
         - } else {
-          a.etStatus.unavailable(href="#", id="#{i+1}")
-            .id #{et.id}
-            - if (et.cal) {
+          .etStatus.unavailable
+            .id #{ets[i].id}
+            - if (ets[i].cal) {
               .info Calibrating
             - }
-            - else if (et.paired) {
-              .info In use
-            - }
-            .ip #{et.ip}
+            .ip #{ets[i].ip}
         - }
       - }
 
