@@ -4,9 +4,15 @@ def default_onETEvent(etevent):
 
 class EyeTracker(object):
 
-    # A variable holding a function.
-    # It is called when a point is gotten from the tracker.
-    onETEvent = default_onETEvent
+    def __init__(self):
+        self.listeners = []
+
+    # Register an callback to be called when ETEvents is recieved from the tracker.
+    # callback is called like this:
+    # callback(ETEvent)
+    # No arguments becuase I could not figure out how to store them properly.
+    def register_onETEvent(self, callback):
+        self.listeners.append(callback)
 
     # This method calls the function variable onETEvent.
     # As the parameter it use the second parameter.
@@ -14,11 +20,18 @@ class EyeTracker(object):
     # Can be overrided if the data should be manipulated before client use
     # or if extra side effects should be performed.
     def callETEvent(self, etevent):
-        self.onETEvent(etevent)
+        for callback in self.listeners:
+            callback(etevent)
+
+    # Set if the tracker should be active.
+    # callback is called with a result, *args and **kwargs when the operation is completed.
+    def enable(self, callback, *args, **kwargs):
+        raise NotImplementedError
 
     # Set if the tracker should be active or not.
     # This might shutdown the tracker if the implementation wants to.
-    def enable(yes=True):
+    # callback is called with a result, *args and **kwargs when the operation is completed.
+    def disable(self, callback, *args, **kwargs):
         raise NotImplementedError
 
     # Allows callers to query the tracker for a statuscode.
@@ -29,7 +42,8 @@ class EyeTracker(object):
     # 3: Enabled and calibrating
     #
     # Other than that, implementations may do what ever they feel fitting.
-    def getState(self):
+    # callback is called with the status, *args and **kwargs.
+    def getState(self, callback, *args, **kwargs):
         raise NotImplementedError
 
     # Puts the tracker in calibration mode.
@@ -37,44 +51,53 @@ class EyeTracker(object):
     # between the normal vector of the users table and the tracker.
     # If the tracker does not support calibration, return False.
     # If the tracker could not be placed in calibration mode, return False.
-    def startCalibration(self, angle):
+    # callback is called with a result, *args and **kwargs when the operation is completed.
+    def startCalibration(self, angle, callback, *args, **kwargs):
         raise NotImplementedError
 
     # Takes the tracker out of calibration mode.
     # If the tracker could not be taken out of calibration mode, return False
-    def endCalibration(self):
+    # callback is called with a result, *args and **kwargs when the operation is completed.
+    def endCalibration(self, callback, *args, **kwargs):
         raise NotImplementedError
 
     # Clears any calibration actions done.
     # Restore the tracker to a state equal to that
     # right after calibration was initiated.
-    def clearCalibration(self):
+    # callback is called with *args and **kwargs when the operation is completed.
+    def clearCalibration(self, callback, *args, **kwargs):
         raise NotImplementedError
 
     # Adds the point (x, y) to the calibration.
     # When this is called, the user is expected to be looking at that point.
-    # Returns False if the point could not be added.
-    # Returns False if the tracker is not calibrating.
-    # Otherwise, return True.
-    def addPoint(self, x, y):
+    # callback is called with result, *args and **kwargs when the operation is completed.
+    # result is False if the point could not be added.
+    # result is False if the tracker is not calibrating.
+    # Otherwise, result is True.
+    def addPoint(self, x, y, callback, *args, **kwargs):
         raise NotImplementedError
 
     # Free for interpretation of the implementor.
-    # Returns a integer that identifies the tracker.
-    def getName(self):
-        return 0
+    # callback is called with name, *args and **kwargs when the operation is completed.
+    def getName(self, callback, *args, **kwargs):
+        callback(0, *args, **kwargs)
 
     # Gives a set of rates for which the tracker supports delivery of ETEvent.
     # Common values include 24, 25 30, 60 and 120.
     # Use -1 for unknown or variable rates.
     # If -1 is returned, the implementation takes it upon itself to be able to handle all requested framerates.
-    def getRates(self):
-        return set([-1])
+    # callback is called with rates, *args and **kwargs when the operation is completed.
+    def getRates(self, callback, *args, **kwargs):
+        callback(set([-1]), *args, **kwargs)
+
+    def getRate(self, callback, *args, **kwargs):
+        callback(0, *args, **kwargs)
 
     # Sets the tracker rate to the given value.
     # The value given should be among those returned from getRates, excluding -1.
-    # Returns True if the rate is set to the value. Otherwise it returns False.
-    def setRate(self, rate):
+    # callback is called with result, *args and **kwargs when the operation is completed.
+    # result is the rate that is set.
+    def setRate(self, rate, callback, *args, **kwargs):
         raise NotImplementedError
 
 # Error raised if something is wrong with a tracker.

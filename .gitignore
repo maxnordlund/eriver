@@ -25,6 +25,12 @@ node_modules
 #public/script/bootstrap*
 #public/style/bootstrap*
 
+
+# Python #
+##########
+*.pyc # I hate these files. 
+
+
 # Binaries #
 ##########
 # Compiled Object files

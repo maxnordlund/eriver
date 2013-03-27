@@ -9,13 +9,14 @@ import struct
 import datetime
 
 LOG_FILENAME = 'eriver.log'
-logging.basicConfig(filemode='w', filename=LOG_FILENAME,level=logging.INFO)
+FORMAT = '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
+logging.basicConfig(filemode='w', filename=LOG_FILENAME,level=logging.INFO, format=FORMAT)
 
 def enum(**enums):
     return type('Enum', (), enums)
 
 cmds = enum(GETPOINT=1, STARTCAL=2, ADDPOINT=3, CLEAR=4, ENDCAL=5, UNAVALIABLE=6, NAME=7, FLASH_KLUDGE=60, OST=80, TEAPOT=90)
-lengths = enum(COMMAND=1, GETPOINT=24, STARTCAL=8, ADDPOINT=16, NAME=1, OST=4, TEAPOT=1)
+lengths = enum(COMMAND=1, GETPOINT=24, STARTCAL=8, ADDPOINT=16, NAME=1, FLASH_KLUDGE=22, OST=4, TEAPOT=1)
 
 class ConnHandler(Thread):
     
@@ -39,7 +40,7 @@ class ConnHandler(Thread):
             cmds.NAME: self.sendName,
             cmds.OST: self.sayCheese,
             cmds.TEAPOT: self.IAmATeapot,
-            #cmds.FLASH_KLUDGE: self.getPoint
+            cmds.FLASH_KLUDGE: self.getPoint
 
             }#TODO Fill with functions for great justice.
 
@@ -74,7 +75,7 @@ class ConnHandler(Thread):
     # Panic method.
     # If an error is found on the network, call this and let it handle it "gracefully".
     def panic(self, what="FAT"):
-        self.logger.info("O NOES! FRIEND %s DONT LEIK ME ANYMORE!\n\t IT SAID I WAS %s!" % (str(self), what))
+        self.logger.error("O NOES! FRIEND %s DONT LEIK ME ANYMORE!\n\t IT SAID I WAS %s!" % (str(self), what))
         self.server.handlersLock.acquire()
         try:
             del self.server.handlers[self]
@@ -118,10 +119,15 @@ class ConnHandler(Thread):
             return
         angle = struct.unpack("!d", data)[0]
         self.logger.debug("Angle: %d" % angle)
-        if self.server.eyetracker.startCalibration(angle):
-            self.send(struct.pack("!Bd", cmds.STARTCAL, angle))
-        else:
-            self.unavaliable()
+
+        def on_startcal(res):
+            if res:
+                self.send(struct.pack("!Bd", cmds.STARTCAL, angle))
+            else:
+                self.unavaliable()
+        
+        self.server.eyetracker.startCalibration(angle, on_startcal)
+        
 
     def addPoint(self):
         global lengths
@@ -137,26 +143,39 @@ class ConnHandler(Thread):
             self.logger.error("Not correct length read for ADDPOINT")
             return
         point = struct.unpack("!2d", data)
-        if self.server.eyetracker.addPoint(point[0], point[1]):
-            self.send(struct.pack("!B", cmds.ADDPOINT) + data)
 
-        else:
-            self.unavaliable()
+        def on_addpoint(res):
+            if res:
+                self.send(struct.pack("!B", cmds.ADDPOINT) + data)
+
+            else:
+                self.unavaliable()
+    
+        self.server.eyetracker.addPoint(point[0], point[1], on_addpoint)
 
     def clearCal(self):
-        if self.server.eyetracker.clearCalibration():
-            self.send(struct.pack("!B", cmds.CLEARCAL))
-        else:
-            self.unavaliable()
+        def on_clear(res):
+            if res:
+                self.send(struct.pack("!B", cmds.CLEARCAL))
+            else:
+                self.unavaliable()
+
+        self.server.eyetracker.clearCalibration(on_clear)
 
     def endCal(self):
-        if self.server.eyetracker.endCalibration():
-            self.send(struct.pack("!B", cmds.ENDCAL))
-        else:
-            self.unavaliable()
+        def on_end(res):
+            if res:
+                self.send(struct.pack("!B", cmds.ENDCAL))
+            else:
+                self.unavaliable()
 
+        self.server.eyetracker.clearCalibration(on_end)
+        
     def sendName(self):
-        self.send(struct.pack("!2B", cmds.NAME, self.server.eyetracker.name))
+        def on_name(name):
+            self.send(struct.pack("!2B", cmds.NAME, name))
+
+        self.server.eyetracker.getName(on_name)
 
     def sayCheese(self):
         self.send("Appenzeller")
@@ -167,6 +186,7 @@ class ConnHandler(Thread):
     def Flash_Kludge(self):
         try:
             data = self.conn.recieve(lengths.FLASH_KLUDGE)
+            
         except error:
             self.panic("Error on read of flashkludge")
 
@@ -193,9 +213,23 @@ class ETServer(object):
             self.handlersLock.release()
 
     def start(self):
-        if not self.eyetracker.enable():
-            self.logger.critical("WAT? Eye tracker not enablable?")
-        self.logger.debug("Active? %s" % str(self.eyetracker.active))
+
+        lock = Lock() # For syncronization
+
+        def on_enable(res):
+            if not res:
+                self.logger.critical("WAT? Eye tracker not enablable?")
+                self.shutdown = True
+            lock.release()
+
+        lock.acquire()
+        self.eyetracker.enable(callback=on_enable)
+        lock.acquire()
+                
+        def on_status(res):
+            self.logger.debug("Status? %d" % res)
+
+        self.eyetracker.getState(on_status)
         
         with self.serverSocket: # Start listen and make sure it is closed!
             while not self.shutdown: #Loop until we recive signal of shutdown
