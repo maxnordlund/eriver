@@ -4,19 +4,18 @@ html
     meta(name='charset', content='utf-8')
     title Calibrate ET
     link(rel='stylesheet', type='text/css', href='/style/calibrate.css')
+    link(href='http://fonts.googleapis.com/css?family=Iceland:400,700', rel='stylesheet', type='text/css')
   body
-    #popup
-      #main
-        .logo
-        #contents
-          - if(cal)
-              h2.error Currently calibrating ##{id}.
-              p
-                | The eye tracker you have requested is being calibrated.
-                | Please, do not interfere with this process.
-          - else
-              h2.error Eye tracker ##{id} unavailable.
-              p
-               | The eye tracker you have requested is not available.
-               | Please make sure that it is powered on and properly connected
-               | to the eRiver server.
+    #unavailable.popup
+      img.logo(src='/img/eriver_logo.png', height='70px')
+      - if(cal)
+          h2.error Currently calibrating ##{id}.
+          p
+            | The eye tracker you have requested is being calibrated.
+            | Please, do not interfere with this process.
+      - else
+          h2.error Eye tracker ##{id} unavailable.
+          p
+           | The eye tracker you have requested is not available.
+           | Please make sure that it is powered on and properly connected
+           | to the eRiver server.

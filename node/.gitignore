@@ -31,8 +31,6 @@ node_modules
 *.slo
 *.lo
 *.o
-# Fonts
-*.woff
 
 # Shared objects (inc. Windows DLLs)
 *.dll
@@ -49,6 +47,7 @@ node_modules
 # Executables
 *.exe
 *.out
+
 
 # Mac OS X #
 ############
