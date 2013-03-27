@@ -43,6 +43,10 @@ $(function() {
 		},
 		hide : function() {
 			$(this.dom).hide();
+		},
+		reset : function() {
+			this.hide();
+			this.moveTo(-0.1, 0.1);
 		}
 	};
 	
@@ -88,30 +92,70 @@ $(function() {
 	}
 	
 	var popup = (function() {
-		var popup = $('#contents');
-		/*return {
-			content: 
-		}*/
-		popup.content = function(string) {
-			var replacement = $('#'+string+'.template');
-			popup.css('height', replacement.innerHeight());
-			popup.html(replacement.html());
+		var popup = $('#popup');
+		var contents = popup.find('#contents');
+		var side = popup.find('#side')
+		var curr = contents.find('#connecting').toggleClass('template');
+		var sideVisible = false;
+
+		var obj = {
+			content: function(string) {
+				var replacement = contents.find('#'+string+'.template');
+				curr.toggleClass('template');
+				replacement.toggleClass('template');
+				curr = replacement;
+				
+				this.show();
+			},
+			sideContent: function(string) {
+				side.css('background-image', 'url('+string+')');
+				this.sidePeek()
+				side.css('height', popup.innerHeight());
+			},
+			showSide: function() {
+				side.css('width', 300);
+				sideVisible = true;
+			},
+			sidePeek: function() {
+				side.css('width', 20);
+				sideVisible = false;
+			},
+			hideSide: function() {
+				side.css('width', 0);
+				sideVisible = false;
+			},
+			hide: function() {
+				this.hideSide();
+				popup.css('height', 0);
+				setTimeout(function() {
+					popup.hide();
+				}, 300);
+			},
+			show: function() {
+				popup.show();
+				popup.css('height', '100%');
+			}
 		};
-		return popup;
+
+		side.click(function(){
+			if (sideVisible) {
+				obj.sidePeek();
+			} else {
+				obj.showSide();
+			}
+		});
+		return obj;
 	})();
 
-	//window.Orb = Orb;
-
 	var orb = new Orb();
+
 	var testPoint = {x: 0.5, y: 0.5};
 	var calibrationPoints = [{x:0.1, y:0.1},
-		{x:0.9, y:0.1}, {x:0.5, y:0.5}, {x:0.9, y:0.9},
-		{x:0.1, y:0.9}];
+	{x:0.9, y:0.1}, {x:0.5, y:0.5}, {x:0.9, y:0.9},
+	{x:0.1, y:0.9}];
 	var _currPoints;
-	
 
-
-/* HASH EXTRAS */
+	/* HASH EXTRAS */
 	var hashMod = function() {
 		if (location.hash.indexOf("#david") == 0) {
 			orb.after.addClass('davido');
@@ -130,7 +174,12 @@ $(function() {
 
 	var timeouts = [];
 
-	var socket = io.connect(location.protocol+'//'+location.host);
+	var socket = io.connect(location.protocol+'//'+location.host+'/calibrate');
+
+	socket.on('name', function() {
+		popup.content('prepare');
+		popup.sideContent('/img/eriver_logo.png');
+	});
 
 	socket.on('connect', function() {
 		parts = location.pathname.split("/");
@@ -138,15 +187,10 @@ $(function() {
 		socket.emit('name', num);
 	});
 
-	socket.on('name', function() {
-		$('.popup').hide();
-		$('#prepare').show();
-	});
-
 	socket.on('unavailable', function() {
-		socket.disconnect();
-		$('.popup').hide();
-		$('#unavailable').show();
+		orb.reset();
+
+		popup.content('unavailable');
 
 		timeouts.forEach(function(v) {
 			clearTimeout(v);
@@ -154,14 +198,11 @@ $(function() {
 	});	
 
 	socket.on('disconnect', function() {
-		$(orb.dom).hide();
-		orb.moveTo(-0.1, 0.1);
-		$('.popup').hide();
-		var popup = $('#connecting');
-		popup.find('h2').css('color', 'red').text('Reconnecting...');
-		popup.show();
+		orb.reset();
+		
+		popup.content('reconnecting');
+
 		timeouts.forEach(function(v) {
-			console.log(v);
 			clearTimeout(v);
 		});
 	});
@@ -170,19 +211,11 @@ $(function() {
 		var err = Math.round(Math.sqrt(Math.pow((point.x - testPoint.x)*16/9, 2) + Math.pow(point.y - testPoint.y, 2))*window.innerHeight);
 		var str = 'Calibration error of ~' + err + ' pixels.';
 		console.warn(str);
-		$('.errorsize').show();
-		$('.errorsize').css('width', err+'px').css('height', err+'px');
+		if (err < 250) {
+			$('.errorRing').css('width', err+'px').css('height', err+'px');
+			$('.errorRing').show();
+		}
 		$('.errortext').text(str);
-	});
-
-	/* DEMO method, DELETE */
-	$('.popup input[type="button"]').click(function(e) {
-		e.stopPropagation();
-		$(this).parent().hide();
-		
-		socket.emit('startCal', {angle: parseFloat($('#angle').val())});
-	
-		socket.on('startCal', calibrate);
 	});
 
 	socket.on('addPoint', function() {
@@ -190,6 +223,15 @@ $(function() {
 		setTimeout(function() {
 			updateOrb(_currPoints);
 		}, 500);
+	});
+
+	$('#contents input[type="button"]').click(function(e) {
+		e.stopPropagation();
+		popup.hideSide();
+		popup.hide();
+		
+		socket.on('startCal', calibrate);
+		socket.emit('startCal', {angle: parseFloat($('#angle').val())});
 	});
 
 	var updateOrb = function(list) {
@@ -203,8 +245,9 @@ $(function() {
 				setTimeout(function() {
 					socket.emit('getPoint'); //start getPoint
 					socket.emit('getPoint'); //end getPoint
-					$(orb.dom).hide();
-					$('#complete').show();
+					orb.dom.hide();
+					//$('#complete').show();
+					popup.content('complete');
 				}, 500);
 			}, 1000));
 
@@ -224,46 +267,11 @@ $(function() {
 
 	/* DEMO function, DELETE */
 	var calibrate = function() {
-		var flexWait = orb.time * 6;
-		var moveWait = 1000;
-		var extra = 0;
-
-		
-		var totalTime = moveWait + flexWait + extra;
-
 		$(orb.dom).show();
 
 		_currPoints = calibrationPoints.slice();
 
 		updateOrb(_currPoints);
-/*
-		calibrationPoints.forEach(function(point, index) {
-			setTimeout(function() {
-				orb.moveTo(point.x, point.y);
-				setTimeout(function() {
-					socket.emit('addPoint', point);
-					orb.contract();
-					setTimeout(function() {
-						orb.expand();
-					}, 1000);
-				}, 1000);
-			}, totalTime*index);
-		});
-
-		timeouts.push(setTimeout(function() {
-			orb.moveTo(testPoint.x, testPoint.y);
-
-			socket.emit('endCal');
-
-			timeouts.push(setTimeout(function() {
-				socket.emit('getPoint'); //start getPoint
-				socket.emit('getPoint'); //end getPoint
-				$(orb.dom).hide();
-				$('#complete').show();
-				//$('#back').show();
-			}, 1000));
-		}, totalTime*5));
-*/
 	}
 	
 	window.orb = orb;

@@ -53,8 +53,8 @@ app.get "/calibrate/:num", (req, res) ->
       res.render "unavailable",
         et
     else
-      res.render "calibrate"
-    #TODO
+      res.render "calibrate",
+        et
   else if et?
     et.id = num
     res.render "unavailable",
@@ -92,8 +92,19 @@ app.get "/stats/:num.json", (req, res) ->
         return
       res.sendfile resolvedPath
 
-io.sockets.on "connection", (socket) ->
+statusList = []
 
+pushStatusUpdates = ->
+  
+
+io.of('/status').on 'connection', (socket) ->
+  statusList.push socket
+  
+  socket.on 'disconnect', ->
+    statusList.splice statusList.indexOf(socket), 1
+    
+
+io.of('/calibrate').on "connection", (socket) ->
   socket.on "name", (id) ->
     console.log "main: socket.on 'name'"
     et = etmanager.get id
