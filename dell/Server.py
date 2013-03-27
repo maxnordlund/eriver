@@ -120,7 +120,7 @@ class ConnHandler(Thread):
         angle = struct.unpack("!d", data)[0]
         self.logger.debug("Angle: %d" % angle)
 
-        def on_startcal(res)
+        def on_startcal(res):
             if res:
                 self.send(struct.pack("!Bd", cmds.STARTCAL, angle))
             else:
@@ -170,9 +170,10 @@ class ConnHandler(Thread):
                 self.unavaliable()
 
         self.server.eyetracker.clearCalibration(on_end)
+        
     def sendName(self):
         def on_name(name):
-            self.send(struct.pack("!2B", cmds.NAME, name)
+            self.send(struct.pack("!2B", cmds.NAME, name))
 
         self.server.eyetracker.getName(on_name)
 
