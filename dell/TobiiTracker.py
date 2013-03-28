@@ -100,75 +100,16 @@ class AnalyticsTracker(EyeTracker):
 
         #Does this work? YES IT DOES!
         def etlooker(event_type, event_name, eyetracker_info):
-            def etassigner(eyetracker):
-                self.et = eyetracker
-                lock.release()
-            
-            if event_type == etio.EyetrackerBrowser.FOUND:
-                if eyetracker_info.status() == "ok"
-                    create_async(cls, self.mainloop, eyetracker_info, etassigner)
-                
-            elif event_type == etio.EyetrackerBrowser.UPDATED:
-                pass
-            
-            elif event_type == etio.EyetrackerBrowser.REMOVED:
-                if eyetracker_info.product_id() == self.et.
-                self.logger.info("Tracker disconnected")
-                self.et = None
-                pass
-            
+            pass
         
         lock.acquire() #asynchronous to synchronous
         browser = etio.browsing.EyetrackerBrowser(self.mainloop, etlooker)
         lock.acquire()
         lock.release()
+        
         while self.running:
             pass
 
         browser.stop()
         self.mainloop.stop()
-            
-    
-
-
-    def getState(self):
-        pass
-
-    def startCalibration(self, angle):
-        lock = threading.Lock()
-
-        #Does this work? YES IT DOES!
-        def start_calibrator(event_type, event_name, eyetracker_info):
-            lock.release()
-        
-        lock.acquire() #asynchronous to synchronous
-        browser = self.et.StartCalibration(self, callback=startcalibrator)
-        lock.acquire()
-
-    def endCalibration(self):
-        return False
-
-    def clearCalibration(self):
-        return False
-
-    def addPoint(self, x, y):
-        return False
-
-    def getName(self):
-        return 0
-
-    def getRates(self):
-        return set([0])
-
-    def getRate(self):
-        et.etFramerate()
-        
-    def setRate(self, rate):
-        pass
-        
-
-    def run(self):
-        
-        self.mainloop.stop()
-            
     
