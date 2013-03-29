@@ -33,6 +33,7 @@
     "express-error": "0.0.x"
   },
   "scripts": {
+    "prestart": "sh prestart.sh",
     "preinstall": "sh preinstall.sh",
     "start": "nodemon"
   }
