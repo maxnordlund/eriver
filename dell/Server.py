@@ -3,14 +3,15 @@ from socket import error
 import logging
 from threading import (Thread, Lock)
 
-from MockTracker import MockTracker
+#from MockTracker import MockTracker
+from TobiiTracker import AnalyticsTracker as TobiiTracker
 
 import struct
 import datetime
 
 LOG_FILENAME = 'eriver.log'
 FORMAT = '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
-logging.basicConfig(filemode='w', filename=LOG_FILENAME,level=logging.INFO, format=FORMAT)
+logging.basicConfig(filemode='w', filename=LOG_FILENAME,level=logging.DEBUG, format=FORMAT)
 
 def enum(**enums):
     return type('Enum', (), enums)
@@ -197,7 +198,7 @@ class ETServer(object):
         self.shutdown = False # A way for any part of the server to give a shutdown signal
         self.handlers = dict()# All the handlers of the server
         self.handlersLock = Lock()# A lock to regulate when parts can use the handlers.
-        self.eyetracker = MockTracker(self.sendData) #We need a tracker aswell.
+        self.eyetracker = TobiiTracker(self.sendData) #We need a tracker aswell.
         self.logger = logging.getLogger(name) # A logger is good to have
         
         self.serverSocket = TCPHandler(addr, None, True) # Create a server socket for listening to connection attempts
@@ -213,24 +214,23 @@ class ETServer(object):
             self.handlersLock.release()
 
     def start(self):
-
         lock = Lock() # For syncronization
-
         def on_enable(res):
             if not res:
                 self.logger.critical("WAT? Eye tracker not enablable?")
                 self.shutdown = True
             lock.release()
-
         lock.acquire()
-        self.eyetracker.enable(callback=on_enable)
+        self.eyetracker.enable(blocking=True, callback=on_enable)
         lock.acquire()
                 
         def on_status(res):
             self.logger.debug("Status? %d" % res)
-
+            
+        print("Debug")
         self.eyetracker.getState(on_status)
-        
+
+        print("Started.")
         with self.serverSocket: # Start listen and make sure it is closed!
             while not self.shutdown: #Loop until we recive signal of shutdown
                 try:
@@ -267,9 +267,11 @@ if __name__ == "__main__":
     logging.info("\tAWSUM THX")
     logging.info("\t\tDO_STUFFS!")
     try:
+        print("Starting...")
         ETServer(addr).start()
+        print("Stopping...")
 
-    except error:
+    except (error, ETError):
         logging.info("\tO NOES")
         logging.info("\t\tPANIC!")
         exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -278,7 +280,9 @@ if __name__ == "__main__":
         logging.error("Type:%s \t Value: %s\n%s" % (str(exc_type), str(exc_value), str(exc_traceback)))
         
     finally:
+        print("Stopped.")
         logging.info("KTHXBYE!")
+        sys.exit(0)
 
 
     
