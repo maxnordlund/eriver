@@ -118,4 +118,7 @@ class ETEvent(object):
         self.x=x
         self.y=y
         self.timestamp=timestamp
+
+    def __str__(self):
+        return "ETEvent: (x: %f, y: %f, time: %d)" % (self.x, self.y, self.timestamp)
     

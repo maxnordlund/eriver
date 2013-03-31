@@ -37,12 +37,14 @@ weights = { # These are the values we can get.
 class AnalyticsTracker(EyeTracker):
     def __init__(self, onETEvent, etid=None, name=1, fps=60):
        super(AnalyticsTracker, self).__init__()
+       self.register_onETEvent(onETEvent)
+       
        tobii.eye_tracking_io.init()
        self.running = True
        self.queue = Queue.Queue()
 
        self.enabled = False
-       self.calibration = False
+       self.calibrating = False
 
        self.mainloop = tobii.eye_tracking_io.mainloop.MainloopThread()
        self.etid = None
@@ -103,35 +105,37 @@ class AnalyticsTracker(EyeTracker):
     # Other than that, implementations may do what ever they feel fitting.
     # callback is called with the status, *args and **kwargs.
     def getState(self, callback, *args, **kwargs):
+        self.enqueue(callback, 1, *args, **kwargs) # Kludge
+        return
         
         if self.et == None:
             print("-1")
-            self.enqueue(callback, -1, *args, **kwargs)
+            callback(-1, *args, **kwargs)
             return
 
         print("WHAT?")
         if (self.enabled and self.calibrating):
             print("3")
-            self.enqueue(callback, 3, *args, **kwargs)
+            callback(3, *args, **kwargs)
             return
         
         if (not self.enabled) and self.calibrating:
             print("2")
-            self.enqueue(callback, 2, *args, **kwargs)
+            callback(2, *args, **kwargs)
             return
 
         if self.enabled and (not self.calibrating):
             print("1")
-            self.enqueue(callback, 1, *args, **kwargs)
+            callback(1, *args, **kwargs)
             return
 
         if (not self.enabled) and (not self.calibrating):
             print("0")
-            self.enqueue(callback, 0, *args, **kwargs)
+            callback(0, *args, **kwargs)
             return
 
         print("-2")
-        self.enqueue(callback, -2, *args, **kwargs)
+        callback(-2, *args, **kwargs)
             
 
     # Puts the tracker in calibration mode.
@@ -142,7 +146,7 @@ class AnalyticsTracker(EyeTracker):
     # callback is called with a result, *args and **kwargs when the operation is completed.
     def startCalibration(self, angle, callback, *args, **kwargs):
         if self.et == None:
-            self.enqueue(callback, False, *args, **kwargs)
+            callback(False, *args, **kwargs)
             return
         
         #self.et.StopTracking()
@@ -153,7 +157,7 @@ class AnalyticsTracker(EyeTracker):
     # callback is called with a result, *args and **kwargs when the operation is completed.
     def endCalibration(self, callback, *args, **kwargs):
         if self.et == None:
-            self.enqueue(callback, False, *args, **kwargs)
+            callback(False, *args, **kwargs)
             return
 
         def onComputationCompleted():
@@ -167,7 +171,7 @@ class AnalyticsTracker(EyeTracker):
     # callback is called with *args and **kwargs when the operation is completed.
     def clearCalibration(self, callback, *args, **kwargs):
         if self.et == None:
-            self.enqueue(callback, False, *args, **kwargs)
+            callback(False, *args, **kwargs)
             return
         self.et.ClearCalibration(callback, True, *args, **kwargs)
 
@@ -179,7 +183,7 @@ class AnalyticsTracker(EyeTracker):
     # Otherwise, result is True.
     def addPoint(self, x, y, callback, *args, **kwargs):
         if self.et == None or not self.calibrating:
-            self.enqueue(callback, False, *args, **kwargs)
+            callback(False, *args, **kwargs)
             return
         self.et.AddCalibrationPoint((x, y), callback, True, *args, **kwargs)
 
@@ -195,7 +199,7 @@ class AnalyticsTracker(EyeTracker):
     # callback is called with rates, *args and **kwargs when the operation is completed.
     def getRates(self, callback, *args, **kwargs):
         if self.et == None:
-            self.enqueue(callback, set([0]), *args, **kwargs)
+            callback(set([0]), *args, **kwargs)
             return
         self.et.EnumerateFramerates(callback, *args, **kwargs)
 
@@ -208,7 +212,7 @@ class AnalyticsTracker(EyeTracker):
     # result is the rate that is set.
     def setRate(self, rate, callback, *args, **kwargs):
         if self.et == None:
-            self.enqueue(callback, False, *args, **kwargs)
+            callback(False, *args, **kwargs)
             return
         self.et.SetFramerate(rate, callback, *args, **kwargs)
 
@@ -269,7 +273,7 @@ class AnalyticsTracker(EyeTracker):
         if not error == 0:
             print("Errorcode: %d" % error)
         else:
-            #print("Got Data for transformation!")
+            print("Got Data for transformation!")
             #print("Left")
             lx, ly = gdi.LeftGazePoint2D.x, gdi.LeftGazePoint2D.y
             lv = gdi.LeftValidity
@@ -288,5 +292,6 @@ class AnalyticsTracker(EyeTracker):
             y = ly*lweight + ry*rweight
 
             etevent = ETEvent(x, y, timestamp)
+            print(str(etevent))
             self.callETEvent(etevent)
     

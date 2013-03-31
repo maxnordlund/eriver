@@ -3,7 +3,7 @@ from socket import error
 import logging
 from threading import (Thread, Lock)
 
-#from MockTracker import MockTracker
+from MockTracker import MockTracker
 from TobiiTracker import AnalyticsTracker as TobiiTracker
 
 import struct
@@ -206,6 +206,7 @@ class ETServer(object):
     def sendData(self, etevent):
         #logger.debug("Handlers: %s" % str(handlers))
         #Do not block. This leads to lost events when clients disconnect, but hey, better than having the server lag behind...
+        print("Call for sendData!")
         if self.handlersLock.acquire(False):
             for h in self.handlers:
                 self.logger.debug(str(h) + str(h.listen))
@@ -227,7 +228,6 @@ class ETServer(object):
         def on_status(res):
             self.logger.debug("Status? %d" % res)
             
-        print("Debug")
         self.eyetracker.getState(on_status)
 
         print("Started.")
@@ -271,13 +271,8 @@ if __name__ == "__main__":
         ETServer(addr).start()
         print("Stopping...")
 
-    except (error, ETError):
-        logging.info("\tO NOES")
-        logging.info("\t\tPANIC!")
-        exc_type, exc_value, exc_traceback = sys.exc_info()
-        logging.info("\t\tLOOKZ! KITTY!")
-        logging.error("KITTY! IT HID " + datetime.datetime.now().isoformat(' '))
-        logging.error("Type:%s \t Value: %s\n%s" % (str(exc_type), str(exc_value), str(exc_traceback)))
+    except:
+        logging.exception(exc_info=True)
         
     finally:
         print("Stopped.")
