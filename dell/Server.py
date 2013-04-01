@@ -18,7 +18,7 @@ def enum(**enums):
 cmds = enum(GETPOINT=1, STARTCAL=2, ADDPOINT=3, CLEAR=4, ENDCAL=5, UNAVALIABLE=6, NAME=7, FLASH_KLUDGE=60, OST=80, TEAPOT=90)
 lengths = enum(COMMAND=1, GETPOINT=24, STARTCAL=8, ADDPOINT=16, NAME=1, FLASH_KLUDGE=22, OST=4, TEAPOT=1)
 
-tracker_types = enum(MOCK="MOCK")
+tracker_types = enum(MOCK="MOCK", TOBII="TOBII")
 
 class ConnHandler(Thread):
     
@@ -300,9 +300,12 @@ if __name__ == "__main__":
     tracker = None
     if len(args) < 1:
         raise ValueError('No tracker type specified.')
-        
-    if args[0].upper() == tracker_types.MOCK:
+
+    tracker_type = args[0].upper()
+    if tracker_type == tracker_types.MOCK:
         tracker = MockTracker(name=options.name)
+    elif tracker_type == tracker_types.TOBII:
+        tracker = TobiiTracker(name=options.name)
     else:
         raise ValueError('Invalid tracker type.\n See the help text for more information.')
     

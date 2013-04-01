@@ -35,9 +35,8 @@ weights = { # These are the values we can get.
 # Implements the interface given in documentation to EyeTracker class.
 # Implementation for Tobii's range of 3.0 analytics eyetrackers
 class AnalyticsTracker(EyeTracker):
-    def __init__(self, onETEvent, etid=None, name=1, fps=60):
+    def __init__(self, etid=None, name=1, fps=60):
        super(AnalyticsTracker, self).__init__()
-       self.register_onETEvent(onETEvent)
        
        tobii.eye_tracking_io.init()
        self.running = True
