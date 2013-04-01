@@ -223,6 +223,7 @@ class ETServer(object):
             lock.release()
         lock.acquire()
         self.eyetracker.enable(blocking=True, callback=on_enable)
+        self.
         lock.acquire()
                 
         def on_status(res):

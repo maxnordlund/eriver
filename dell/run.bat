@@ -1,2 +1,2 @@
 set PYTHONPATH=%PYTHONPATH%;..\python\
-python server.py
+"C:\Program Files (x86)\Python\python.exe" server.py

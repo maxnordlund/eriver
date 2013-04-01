@@ -1,2 +1,2 @@
 set PYTHONPATH=%PYTHONPATH%;..\python\
-python terminal_listener.py
+"C:\Program Files (x86)\Python\python.exe" terminal_listener.py
