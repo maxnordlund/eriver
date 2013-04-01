@@ -17,10 +17,7 @@ FORMAT = '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
 def enum(**enums):
 	return type('Enum', (), enums)
 
-tracker_types = enum(MOCK="MOCK")
-
 tracker_types = enum(MOCK="MOCK", TOBII="TOBII")
-
 
 class ETServer(object):
 	def __init__(self, addr, tracker, name="ETServer"):
@@ -153,5 +150,3 @@ if __name__ == "__main__":
 		print("Stopped.")
 		logging.info("KTHXBYE!")
 
-
-	
