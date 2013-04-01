@@ -1,2 +1,2 @@
 set PYTHONPATH=%PYTHONPATH%;..\python\
-python server.py
+python server.py mock

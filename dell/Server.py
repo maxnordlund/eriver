@@ -10,13 +10,14 @@ import datetime
 
 LOG_FILENAME = 'eriver.log'
 FORMAT = '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
-logging.basicConfig(filemode='w', filename=LOG_FILENAME,level=logging.INFO, format=FORMAT)
 
 def enum(**enums):
     return type('Enum', (), enums)
 
 cmds = enum(GETPOINT=1, STARTCAL=2, ADDPOINT=3, CLEAR=4, ENDCAL=5, UNAVALIABLE=6, NAME=7, FLASH_KLUDGE=60, OST=80, TEAPOT=90)
 lengths = enum(COMMAND=1, GETPOINT=24, STARTCAL=8, ADDPOINT=16, NAME=1, FLASH_KLUDGE=22, OST=4, TEAPOT=1)
+
+tracker_types = enum(MOCK="MOCK")
 
 class ConnHandler(Thread):
     
@@ -193,11 +194,15 @@ class ConnHandler(Thread):
         self.send('<?xml version="1.0"?><cross-domain-policy><allow-access-from domain="*" to-ports="*" ></cross-domain-policy>\0')
 
 class ETServer(object):
-    def __init__(self, addr, name="ETServer"):
+    def __init__(self, addr, tracker, name="ETServer"):
         self.shutdown = False # A way for any part of the server to give a shutdown signal
+        
         self.handlers = dict()# All the handlers of the server
         self.handlersLock = Lock()# A lock to regulate when parts can use the handlers.
-        self.eyetracker = MockTracker(self.sendData) #We need a tracker aswell.
+        
+        self.eyetracker = tracker #We need a tracker aswell.
+        self.eyetracker.register_onETEvent(self.sendData)
+        
         self.logger = logging.getLogger(name) # A logger is good to have
         
         self.serverSocket = TCPHandler(addr, None, True) # Create a server socket for listening to connection attempts
@@ -258,16 +263,50 @@ class ETServer(object):
 
 if __name__ == "__main__":
 
+    from optparse import OptionParser
     import sys, traceback
+
+    parser = OptionParser()
+    parser.set_usage("python server.py [options] type=[MOCK, TOBII]")
+    parser.add_option("-n", "--name", type="int", default=1,
+                    help="The name the server. Is sent to clients on connect.")
+    parser.add_option("-l", "--loglevel", default="WARNING",
+                    help="Change the loglevel of the output. Default=WARNING")
+    parser.add_option("-a", "--address", default="localhost",
+                    help="The address the server should listen on. Default='localhost'")
+    parser.add_option("-p", "--port", type="int", default=3031,
+                    help="The port the server should listen on. Default='3031'")
+
+    (options, args) = parser.parse_args()
+
+    # assuming loglevel is bound to the string value obtained from the
+    # command line argument. Convert to upper case to allow the user to
+    # specify --log=DEBUG or --log=debug
+    # Shamefullt stolen from http://docs.python.org/3.4/howto/logging.html
+    numeric_level = getattr(logging, options.loglevel.upper(), None)
+    if not isinstance(numeric_level, int):
+        raise ValueError('Invalid log level: %s' % loglevel)
+
+    logging.basicConfig(filemode='w', filename=LOG_FILENAME,level=numeric_level, format=FORMAT)
     
-    addr = ("0.0.0.0", 3031)
+    addr = (options.address, options.port)
     logging.info("HAI")
     logging.info("CAN I HAS NETWORK?")
     logging.info("PLZ LISTEN 2 TCP " + str(addr) + "?")
     logging.info("\tAWSUM THX")
     logging.info("\t\tDO_STUFFS!")
+
+    tracker = None
+    if len(args) < 1:
+        raise ValueError('No tracker type specified.')
+        
+    if args[0].upper() == tracker_types.MOCK:
+        tracker = MockTracker(name=options.name)
+    else:
+        raise ValueError('Invalid tracker type.\n See the help text for more information.')
+    
     try:
-        ETServer(addr).start()
+        ETServer(addr, tracker).start()
 
     except error:
         logging.info("\tO NOES")
