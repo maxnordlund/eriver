@@ -211,7 +211,6 @@ class ETServer(object):
     def sendData(self, etevent):
         #logger.debug("Handlers: %s" % str(handlers))
         #Do not block. This leads to lost events when clients disconnect, but hey, better than having the server lag behind...
-        print("Call for sendData!")
         if self.handlersLock.acquire(False):
             for h in self.handlers:
                 self.logger.debug(str(h) + str(h.listen))
@@ -228,7 +227,6 @@ class ETServer(object):
             lock.release()
         lock.acquire()
         self.eyetracker.enable(blocking=True, callback=on_enable)
-        self.
         lock.acquire()
                 
         def on_status(res):
