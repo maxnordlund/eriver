@@ -14,8 +14,8 @@ FORMAT = '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
 def enum(**enums):
     return type('Enum', (), enums)
 
-cmds = enum(GETPOINT=1, STARTCAL=2, ADDPOINT=3, CLEAR=4, ENDCAL=5, UNAVALIABLE=6, NAME=7, FLASH_KLUDGE=60, OST=80, TEAPOT=90)
-lengths = enum(COMMAND=1, GETPOINT=24, STARTCAL=8, ADDPOINT=16, NAME=1, FLASH_KLUDGE=22, OST=4, TEAPOT=1)
+cmds = enum(GETPOINT=1, STARTCAL=2, ADDPOINT=3, CLEAR=4, ENDCAL=5, UNAVALIABLE=6, NAME=7, FPS=8, FLASH_KLUDGE=60, OST=80, TEAPOT=90)
+lengths = enum(COMMAND=1, GETPOINT=24, STARTCAL=8, ADDPOINT=16, NAME=1, FLASH_KLUDGE=22, FPS=4, OST=4, TEAPOT=1)
 
 tracker_types = enum(MOCK="MOCK")
 
@@ -39,6 +39,7 @@ class ConnHandler(Thread):
             cmds.ENDCAL: self.endCal,
             cmds.UNAVALIABLE: self.unavaliable,
             cmds.NAME: self.sendName,
+            cmds.FPS: self.sendFPS,
             cmds.OST: self.sayCheese,
             cmds.TEAPOT: self.IAmATeapot,
             cmds.FLASH_KLUDGE: self.getPoint
@@ -169,7 +170,7 @@ class ConnHandler(Thread):
                 self.send(struct.pack("!B", cmds.ENDCAL))
             else:
                 self.unavaliable()
-
+                
         self.server.eyetracker.clearCalibration(on_end)
         
     def sendName(self):
@@ -178,7 +179,32 @@ class ConnHandler(Thread):
 
         self.server.eyetracker.getName(on_name)
 
+    def sendFPS(self):
+        try:
+            data = self.conn.recieve(lengths.FPS)
+        except error:
+            self.panic("Error on read of ost")
+            return
+
+        if not len(data) == lengths.FPS:
+            self.logger.error("Not correct length read for ADDPOINT")
+            return
+        
+        def on_fps(fps):
+            self.send(struct.pack("!Bf", cmds.FPS, fps))
+
+        self.server.eyetracker.getRate(on_fps)
+
     def sayCheese(self):
+        try:
+            data = self.conn.recieve(lengths.OST)
+        except error:
+            self.panic("Error on read of ost")
+            return
+
+        if not len(data) == lengths.OST:
+            self.logger.error("Not correct length read for ADDPOINT")
+            return
         self.send("Appenzeller")
 
     def IAmATeapot(self):
