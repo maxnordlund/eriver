@@ -2,7 +2,7 @@ express = require "express"
 stylus = require "stylus"
 socketio = require "socket.io"
 etmanager = require "./etman.coffee"
-config = require "../config.json"
+config = require "../config_node.json"
 fs = require "fs"
 nib = require "nib"
 
