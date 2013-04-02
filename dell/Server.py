@@ -235,14 +235,14 @@ class ETServer(object):
         self.serverSocket = TCPHandler(addr, None, True) # Create a server socket for listening to connection attempts
 
     def sendData(self, etevent):
-        for h in self.handlers.keys():
-            (proc, events) = self.handlers[h]
-            if proc.is_alive():
+        #logger.debug("Handlers: %s" % str(handlers))
+        #Do not block. This leads to lost events when clients disconnect, but hey, better than having the server lag behind...
+        if self.handlersLock.acquire(False):
+            for h in self.handlers:
                 #self.logger.debug(str(h) + str(h.listen))
-                events.put(etevent, False) #Do not block. Either the reciver is ready, or not. Can't wait.
-            else:
-                del self.handlers[h]
-                
+                if h.listen:
+                    h.send(struct.pack("!B2dq", cmds.GETPOINT, etevent.x, etevent.y, etevent.timestamp)) #This might go bad if one handler blocks.
+            self.handlersLock.release()
 
     def start(self):
         lock = Lock() # For syncronization
