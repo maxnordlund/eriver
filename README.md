@@ -26,7 +26,7 @@ endCal        5   (nothing)
 unavailable   6   (nothing)
 name          7   id: <uint8>
 
-cmd är en unsigned byte (0-255)
+cmd is an unsigned byte (0-255)
 
 getPoint with zero filled x,y,time is a getStream
 The first time you send getPoint to the eye tracker server it initializes a stream that sends points to you.
