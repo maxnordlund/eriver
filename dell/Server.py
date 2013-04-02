@@ -81,12 +81,11 @@ class ConnHandler(Thread):
     # If an error is found on the network, call this and let it handle it "gracefully".
     def panic(self, what="FAT"):
         self.logger.error("O NOES! FRIEND %s DONT LEIK ME ANYMORE!\n\t IT SAID I WAS %s!" % (str(self), what))
-        self.server.handlersLock.acquire()
-        try:
-            del self.server.handlers[self]
-        except KeyError:
-            self.logger.warning("Tried to delete client %s that did not exist" % str(self))
-        self.server.handlersLock.release()
+        with self.server.handlersLock:
+            try:
+                del self.server.handlers[self]
+            except KeyError:
+                self.logger.warning("Tried to delete client %s that did not exist" % str(self))
         self.stop = True
         
 
@@ -206,7 +205,7 @@ class ConnHandler(Thread):
             return
 
         if not len(data) == lengths.OST:
-            self.logger.error("Not correct length read for ADDPOINT")
+            self.logger.error("Not correct length read for OST")
             return
         self.send("Appenzeller")
 
@@ -239,12 +238,15 @@ class ETServer(object):
     def sendData(self, etevent):
         #logger.debug("Handlers: %s" % str(handlers))
         #Do not block. This leads to lost events when clients disconnect, but hey, better than having the server lag behind...
+        
         if self.handlersLock.acquire(False):
+            self.logger.info("Locking handlers for sending")
             for h in self.handlers:
                 #self.logger.debug(str(h) + str(h.listen))
                 if h.listen:
                     h.send(struct.pack("!B2dq", cmds.GETPOINT, etevent.x, etevent.y, etevent.timestamp)) #This might go bad if one handler blocks.
             self.handlersLock.release()
+            self.logger.info("Unlocking handlers for sending")
 
     def start(self):
         lock = Lock() # For syncronization
@@ -271,9 +273,9 @@ class ETServer(object):
                     conn, addr = self.serverSocket.accept() #Blockingly accept connections
                     self.logger.info("\t\t\tFRIEND! AWSUM THX!")
                     h = ConnHandler(conn, addr, self) #Take new connection and fork off a handler
-                    self.handlersLock.acquire() #We do not want the iterator to be mad at us for modifying the dictionary during its run.
-                    self.handlers[h] = True #Put it in dictionary for safe storage.
-                    self.handlersLock.release() # And release!
+                    with self.handlersLock: #We do not want the iterator to be mad at us for modifying the dictionary during its run.
+                        self.handlers[h] = True #Put it in dictionary for safe storage.
+                    
                     h.start() #And kick it away!
                 except (error, KeyboardInterrupt) as e:
                     self.shutdown = True #O NOES!

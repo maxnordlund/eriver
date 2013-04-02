@@ -275,6 +275,7 @@ class AnalyticsTracker(EyeTracker):
                 self.et = eyetracker
                 self.etid = str(eyetracker_info)
                 self.et.events.OnGazeDataReceived += self.henshin
+                self.calibrating = False
                 if self.enabled:
                     def on_reenable(res):
                         print("Re-enabled tracker: %s" % str(res))
