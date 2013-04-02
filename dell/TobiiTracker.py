@@ -2,6 +2,7 @@ from multiprocessing import Process
 from threading import (Thread, Lock)
 import time
 import Queue
+import logging
 
 from ETinterface import (EyeTracker, ETEvent, ETError)
 
@@ -35,30 +36,44 @@ weights = { # These are the values we can get.
 # Implements the interface given in documentation to EyeTracker class.
 # Implementation for Tobii's range of 3.0 analytics eyetrackers
 class AnalyticsTracker(EyeTracker):
-    def __init__(self, etid=None, name=1, fps=60):
-       super(AnalyticsTracker, self).__init__()
+    def __init__(self, etid=None, name=1, fps=60, logger=None):
+        super(AnalyticsTracker, self).__init__()
+        if logger==None:
+            FORMAT = '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
+            logging.basicConfig(level=logger.DEBUG, format=FORMAT)
+            print("WHAT?")
+            self.logger = logging.Logger("TobiiTracker")
+        else:
+            self.logger = logger
        
-       tobii.eye_tracking_io.init()
-       self.running = True
-       self.queue = Queue.Queue()
+        tobii.eye_tracking_io.init()
+        self.running = True
+        self.queue = Queue.Queue()
+        self.enabled = False
+        self.calibrating = False
 
-       self.enabled = False
-       self.calibrating = False
+        self.mainloop = tobii.eye_tracking_io.mainloop.MainloopThread()
+        self.etid = None
+        self.et = None
+        self.thread = Thread(target=self.connect)
+        self.thread.start()
 
-       self.mainloop = tobii.eye_tracking_io.mainloop.MainloopThread()
-       self.etid = None
-       self.et = None
-       self.thread = Thread(target=self.connect)
-       self.thread.start()
-
-       def marshaller():
-           while self.running:
-               f = self.queue.get()
-               f()
+        def marshaller():
+            while self.running:
+                f = self.queue.get()
+                f()
        
-       Thread(target=marshaller).start()
+        Thread(target=marshaller).start()
        
-       
+    # This method calls the function variable onETEvent.
+    # As the parameter it use the second parameter.
+    # That should be of the type ETEvent or similar.
+    # Can be overrided if the data should be manipulated before client use
+    # or if extra side effects should be performed.
+    def callETEvent(self, etevent):
+        if etevent.x <= 0 and etevent.y <= 0:
+            return
+        super(AnalyticsTracker, self).callETEvent(etevent) 
 
     # Set if the tracker should be active.
     # callback is called with a result, *args and **kwargs when the operation is completed.
@@ -149,7 +164,13 @@ class AnalyticsTracker(EyeTracker):
             return
         
         #self.et.StopTracking()
-        self.et.StartCalibration(self, callback, True, *args, **kwargs) 
+        self.logger.debug("Calling SDK's StartCalibration method")
+        def on_startcalib(error, ever):
+            print(error)
+            print(ever)
+            self.calibrating = True
+            callback(True, *args, **kwargs)
+        self.et.StartCalibration(on_startcalib) 
 
     # Takes the tracker out of calibration mode.
     # If the tracker could not be taken out of calibration mode, return False
@@ -160,8 +181,14 @@ class AnalyticsTracker(EyeTracker):
             return
 
         def onComputationCompleted():
-            self.enqueue(self.et.StopCalibration,callback, True, *args, **kwargs)
+            def on_endcalib(error, ever):
+                print(error)
+                print(ever)
+                self.calibrating = False
+                callback(True, *args, **kwargs)
+            self.enqueue(self.et.StopCalibration,on_endcalib)
 
+        self.logger.debug("Calling SDK's EndCalibration method")
         self.et.ComputeCalibration(onComputationCompleted)
 
     # Clears any calibration actions done.
@@ -172,7 +199,14 @@ class AnalyticsTracker(EyeTracker):
         if self.et == None:
             callback(False, *args, **kwargs)
             return
-        self.et.ClearCalibration(callback, True, *args, **kwargs)
+
+        def on_clear(error, ever):
+            print(error)
+            print(ever)
+            callback(True, *args, **kwargs)
+            
+        self.logger.debug("Calling SDK's ClearCalibration method")
+        self.et.ClearCalibration(on_clear)
 
     # Adds the point (x, y) to the calibration.
     # When this is called, the user is expected to be looking at that point.
@@ -184,7 +218,14 @@ class AnalyticsTracker(EyeTracker):
         if self.et == None or not self.calibrating:
             callback(False, *args, **kwargs)
             return
-        self.et.AddCalibrationPoint((x, y), callback, True, *args, **kwargs)
+
+        def on_add(error, ever):
+            print(error)
+            print(ever)
+            callback(True, *args, **kwargs)
+
+        self.logger.debug("Calling SDK's AddCalibrationPoint method")
+        self.et.AddCalibrationPoint(Point2D(x, y), on_add)
 
     # Free for interpretation of the implementor.
     # callback is called with name, *args and **kwargs when the operation is completed.
@@ -200,6 +241,7 @@ class AnalyticsTracker(EyeTracker):
         if self.et == None:
             callback(set([0]), *args, **kwargs)
             return
+        self.logger.debug("Calling SDK's EnumerateFramerates method")
         self.et.EnumerateFramerates(callback, *args, **kwargs)
 
     def getRate(self, callback, *args, **kwargs):
@@ -213,6 +255,7 @@ class AnalyticsTracker(EyeTracker):
         if self.et == None:
             callback(False, *args, **kwargs)
             return
+        self.logger.debug("Calling SDK's SetFramerate method")
         self.et.SetFramerate(rate, callback, *args, **kwargs)
 
     def etlooker(self, event_type, event_name, et_info):
@@ -276,7 +319,7 @@ class AnalyticsTracker(EyeTracker):
         if not error == 0:
             print("Errorcode: %d" % error)
         else:
-            print("Got Data for transformation!")
+            #print("Got Data for transformation!")
             #print("Left")
             lx, ly = gdi.LeftGazePoint2D.x, gdi.LeftGazePoint2D.y
             lv = gdi.LeftValidity
@@ -295,6 +338,6 @@ class AnalyticsTracker(EyeTracker):
             y = ly*lweight + ry*rweight
 
             etevent = ETEvent(x, y, timestamp)
-            print(str(etevent))
+            #print(str(etevent))
             self.callETEvent(etevent)
     

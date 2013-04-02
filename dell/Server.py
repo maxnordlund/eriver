@@ -241,7 +241,7 @@ class ETServer(object):
         #Do not block. This leads to lost events when clients disconnect, but hey, better than having the server lag behind...
         if self.handlersLock.acquire(False):
             for h in self.handlers:
-                self.logger.debug(str(h) + str(h.listen))
+                #self.logger.debug(str(h) + str(h.listen))
                 if h.listen:
                     h.send(struct.pack("!B2dq", cmds.GETPOINT, etevent.x, etevent.y, etevent.timestamp)) #This might go bad if one handler blocks.
             self.handlersLock.release()
@@ -333,7 +333,7 @@ if __name__ == "__main__":
     if tracker_type == tracker_types.MOCK:
         tracker = MockTracker(name=options.name)
     elif tracker_type == tracker_types.TOBII:
-        tracker = TobiiTracker(name=options.name)
+        tracker = TobiiTracker(name=options.name, logger=logging.Logger("TobiiTracker"))
 
     else:
         raise ValueError('Invalid tracker type.\n See the help text for more information.')
