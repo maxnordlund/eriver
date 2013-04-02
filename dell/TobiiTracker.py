@@ -232,6 +232,11 @@ class AnalyticsTracker(EyeTracker):
                 self.et = eyetracker
                 self.etid = str(eyetracker_info)
                 self.et.events.OnGazeDataReceived += self.henshin
+                if self.enabled:
+                    def on_reenable(res):
+                        print("Re-enabled tracker: %s" % str(res))
+                    
+                    self.enable(True, on_reenable)
                 print("Tracker created!")
                      
             if (not self.etid == None) and self.etid == str(et_info):
@@ -254,7 +259,6 @@ class AnalyticsTracker(EyeTracker):
 
     def connect(self):
         browser = tobii.eye_tracking_io.browsing.EyetrackerBrowser(self.mainloop, self.etlooker)
-        
         
         while self.running:
             pass
