@@ -72,6 +72,7 @@ class AnalyticsTracker(EyeTracker):
     # or if extra side effects should be performed.
     def callETEvent(self, etevent):
         if etevent.x <= 0 and etevent.y <= 0:
+            self.logger.debug("")
             return
         super(AnalyticsTracker, self).callETEvent(etevent) 
 
