@@ -35,13 +35,13 @@ app.configure ->
 
 app.get "/", (req, res) ->
   ets = ((etmanager.get id) for id in [0...config.ets.length])
-  console.log ets
+  #console.log ets
   res.render "status"
     ets: ets
 
 app.get "/calibrate", (req, res) -> 
   ets = ((etmanager.get id) for id in [0...config.ets.length])
-  console.log ets
+  #console.log ets
   res.render "status"
     ets: ets
 
@@ -92,17 +92,22 @@ app.get "/stats/:num.json", (req, res) ->
         return
       res.sendfile resolvedPath
 
-statusList = []
+###
+statusList = {}
 
 pushStatusUpdates = ->
-  
+  console.log "Pushing status updates"
+
 
 io.of('/status').on 'connection', (socket) ->
-  statusList.push socket
-  
+  socket.on 'connect', ->
+    statusList.push(socket)
+    socket.emit 'connect'
   socket.on 'disconnect', ->
-    statusList.splice statusList.indexOf(socket), 1
-    
+    #statusList.splice statusList.indexOf(socket), 1
+    delete statusList[socket]
+    #console.log "deleted",socket,"from statusList","\n",statusList
+###
 
 io.of('/calibrate').on "connection", (socket) ->
   socket.on "name", (id) ->

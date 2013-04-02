@@ -63,6 +63,7 @@ $(function() {
 					_this.cb['connect']();
 				}
 			}, 3000);
+
 		}
 		
 		Socket.prototype = {
@@ -130,6 +131,7 @@ $(function() {
 				setTimeout(function() {
 					popup.hide();
 				}, 300);
+				
 			},
 			show: function() {
 				popup.show();
@@ -199,7 +201,7 @@ $(function() {
 
 	socket.on('disconnect', function() {
 		orb.reset();
-		
+
 		popup.content('reconnecting');
 
 		timeouts.forEach(function(v) {
@@ -208,14 +210,21 @@ $(function() {
 	});
 
 	socket.on('getPoint', function(point) {
-		var err = Math.round(Math.sqrt(Math.pow((point.x - testPoint.x)*16/9, 2) + Math.pow(point.y - testPoint.y, 2))*window.innerHeight);
-		var str = 'Calibration error of ~' + err + ' pixels.';
-		console.warn(str);
-		if (err < 250) {
-			$('.errorRing').css('width', err+'px').css('height', err+'px');
-			$('.errorRing').show();
-		}
-		$('.errortext').text(str);
+		socket.emit('getPoint'); //end getPoint
+		setTimeout(function() {
+			orb.expand();
+			orb.dom.hide();
+			popup.content('complete'); //$('#complete').show();
+			var err = Math.round(Math.sqrt(Math.pow((point.x - testPoint.x)*16/9, 2) + Math.pow(point.y - testPoint.y, 2))*window.innerHeight);
+			var str = 'Calibration error of ~' + err + ' pixels.';
+			console.warn(str);
+			if (err < 250) {
+				$('.errorRing').css('width', err+'px').css('height', err+'px');
+				$('.errorRing').show();
+			}
+			$('.errortext').text(str);
+		},500);
+		
 	});
 
 	socket.on('addPoint', function() {
@@ -225,11 +234,18 @@ $(function() {
 		}, 500);
 	});
 
+	socket.on('endCal', function() {
+		orb.contract();
+		setTimeout(function() {
+			socket.emit('getPoint'); //start getPoint
+		}, 500);
+	});
+
 	$('#contents input[type="button"]').click(function(e) {
 		e.stopPropagation();
 		popup.hideSide();
 		popup.hide();
-		
+
 		socket.on('startCal', calibrate);
 		socket.emit('startCal', {angle: parseFloat($('#angle').val())});
 	});
@@ -237,19 +253,9 @@ $(function() {
 	var updateOrb = function(list) {
 		if (list.length == 0) {
 			orb.moveTo(testPoint.x, testPoint.y);
-			socket.emit('endCal');
-
-			timeouts.push(setTimeout(function() {
-				orb.contract();
-
-				setTimeout(function() {
-					socket.emit('getPoint'); //start getPoint
-					socket.emit('getPoint'); //end getPoint
-					orb.dom.hide();
-					//$('#complete').show();
-					popup.content('complete');
-				}, 500);
-			}, 1000));
+			setTimeout(function() {
+				socket.emit('endCal');
+			}, 400);
 
 		} else {
 			point = _currPoints.shift();

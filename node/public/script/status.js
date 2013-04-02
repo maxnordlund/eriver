@@ -1,5 +1,9 @@
 $(function(){
-	var socket = io.connect(location.protocol+'//'+location.host+'/status');
+	//var socket = io.connect(location.protocol+'//'+location.host+'/status');
 
-	window.socket = socket;
+  //socket.emit('connect')
+
+  /*socket.on('update', function() {
+    location.reload();
+  });*/
 });
