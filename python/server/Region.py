@@ -1,15 +1,50 @@
+import os
+import json
+import io
 from datetime import datetime, timedelta
-from TimeList import TimeList
+from .TimeList import TimeList
+
+__dir = os.path.dirname(os.path.join(os.path.abspath(__file__), "..", "..", "statistics")
+
+class TemporalNode(object):
+  """This is a coordinate node for the Region class."""
+
+  def __init__(self, begin, value):
+    self.__slots__ = [ "x", "y", "begin", "end" ]
+    self.x     = value.x
+    self.y     = value.y
+    self.begin = begin
+    self.end   = datetime.max
+
+  def __len__(self):
+    return self.end - self.begin if self.end is not datetime.max else timedelta()
+
+  def __lt__(self, other):
+    return self.begin < other.timestamp
+
+  def __le__(self, other):
+    return self.begin <= other.timestamp
+
+  def __eq__(self, other):
+    return other.timestamp in self
+
+  def __ne__(self, other):
+    return other.timestamp not in self
+
+  def __contains__(self, item):
+    return self.begin <= item.timestamp <= self.end
+
+  def __gt__(self, other):
+    return self.end > other.timestamp
+
+  def __ge__(self, other):
+    return self.end >= other.timestamp
 
 class Region(TimeList):
   """This represents a region of interests."""
 
-  #_duration = timedelta(minutes=1)
-
   def __init__(self):
-    #super(Region, self).__init__()
     TimeList.__init__(self)
-    #self._minute = timedelta(minutes=1)
     self._duration = timedelta(minutes=1)
 
   def __contains__(self, item):
@@ -35,6 +70,28 @@ class Region(TimeList):
 
     out["time"] = str(out["time"])
     return out
+
+  def __setitem__(self, key, value):
+    if self._current is None and value in self:
+      self._current = TemporalNode(datetime.now(), value)
+      self._list.append(self._current)
+    elif self._current is not None and value not in self
+      self._current.end = datetime.now()
+      self._current = None
+    return self._current
+
+  def generate(self):
+    out  = dict()
+    now  = datetime.now()
+    path = self._path + str(now)
+    data = self[now-self._minute:now]
+    del self[:now-self._minute]
+    out["looks"] = len(data)
+    out["time"]  = timedelta()
+    for delta in map(len, data):
+      time += delta
+    with open(, "w", encoding="utf-8") as fil:
+      json.dump(out, fil, indent=4, separators=(',', ': '))
 
 class Rectangle(Region):
   """This represents a rectangular region of interests."""

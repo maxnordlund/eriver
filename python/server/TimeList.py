@@ -1,10 +1,10 @@
 class Node(object):
-  """Node is a coordinate node for the TimeList class."""
+  """This is a coordinate node for the TimeList class."""
 
-  def __init__(self, x, y, timestamp):
+  def __init__(self, timestamp, value):
     self.__slots__ = [ "x", "y", "timestamp" ]
-    self.x = x
-    self.y = y
+    self.x         = value.x
+    self.y         = value.y
     self.timestamp = timestamp
 
   def __lt__(self, other):
@@ -29,33 +29,36 @@ class TimeList(object):
   """TimeList is a class in which you store coordinates by timestamp.
 
      You can access a single coordinate or a slice of coordinates
-     using the closests timestamps. This is done in O(log n)."""
+     using the closest timestamps. This is done in O(log n)."""
 
   def __init__(self):
-    self._Node = Node
     self._list = list()
-
-  def index(self, value, i=0, j=None):
-    j = len(self) - 1 if j is None else j
-    if i >= j:
-      raise ValueError
-    k = (j+i)//2
-    middle = self._left[k]
-    if value < middle:
-      return self.index(value, i, k)
-    elif middle < value:
-      return self.index(value, k, j)
-    else:
-      pass
-
 
   def __len__(self):
     return len(self._list)
 
   def __getitem__(self, key):
+    return self._list[self.index(key)]
 
   def __setitem__(self, key, value):
+    node = Node(key, value)
+    self._list.append(node)
+    return node
 
   def __delitem__(self, key):
+    del self._list[self.index(key)]
 
-
+  def index(self, value, start=0, stop=None):
+    stop    = len(self) - 1 if stop is None else stop
+    middle  = (stop+start)//2
+    element = self._left[middle]
+    if element == value:
+      return middle
+    elif start == stop:
+      raise ValueError("%s is not in list" % str(value))
+    elif element > value:
+      return self.index(value, start, middle - 1)
+    elif element < value:
+      return self.index(value, middle + 1, stop)
+    else:
+      raise ValueError("%s is not in list" % str(value))
