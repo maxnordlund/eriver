@@ -1,6 +1,6 @@
 import asyncore, socket
 
-class Network(asyncore.dispatcher):
+class Network(asyncore.dispatcher_with_send):
   """This is a TCP handler."""
 
   def __init__(self, address=('localhost', 3031)):

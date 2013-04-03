@@ -37,8 +37,17 @@ class TimeList(object):
   def __len__(self):
     return len(self._list)
 
+  def _slice(self, key):
+    if type(key) is slice
+      start = self.index(key.start) if key.start is not None else None
+      stop  = self.index(key.stop) if key.stop is not None else None
+      step  = self.index(key.step) if key.step is not None else None
+      return slice(start, stop, step)
+    else
+      return self.index(key)
+
   def __getitem__(self, key):
-    return self._list[self.index(key)]
+    return self._list[self._slice(key)]
 
   def __setitem__(self, key, value):
     node = Node(key, value)
@@ -46,7 +55,7 @@ class TimeList(object):
     return node
 
   def __delitem__(self, key):
-    del self._list[self.index(key)]
+    del self._list[self._slice(key)]
 
   def index(self, value, start=0, stop=None):
     stop    = len(self) - 1 if stop is None else stop

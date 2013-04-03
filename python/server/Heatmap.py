@@ -69,16 +69,3 @@ class Heatmap(TimeList):
     for x in range(self._width):
       for y in range(self._height):
         yield x, y, heat[x][y]
-
-# def concat(array):
-#   tmp = list()
-#   for arr in array:
-#     tmp += arr
-#   return tmp
-
-# def gen(width=128, height=64):
-#   data = bytearray()
-#   for x in range(width):
-#     for y in range(height):
-#       data.extend([random.randrange(255) for _ in range(4)])
-#   return Image.frombuffer("RGBA", (width, height), buffer(data), "raw", "RGBA", 0, 1)

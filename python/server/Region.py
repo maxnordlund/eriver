@@ -1,10 +1,9 @@
-import os
 import json
-import io
+from os import path, replace
 from datetime import datetime, timedelta
 from .TimeList import TimeList
 
-__dir = os.path.dirname(os.path.join(os.path.abspath(__file__), "..", "..", "statistics")
+__dir = path.abspath(path.join(path.dirname(__file__), "..", "..", "statistics"))
 
 class TemporalNode(object):
   """This is a coordinate node for the Region class."""
@@ -16,8 +15,8 @@ class TemporalNode(object):
     self.begin = begin
     self.end   = datetime.max
 
-  def __len__(self):
-    return self.end - self.begin if self.end is not datetime.max else timedelta()
+  def len(self):
+    return self.end - self.begin if self.end is not datetime.max else 0
 
   def __lt__(self, other):
     return self.begin < other.timestamp
@@ -43,9 +42,12 @@ class TemporalNode(object):
 class Region(TimeList):
   """This represents a region of interests."""
 
-  def __init__(self):
-    TimeList.__init__(self)
-    self._duration = timedelta(minutes=1)
+  def __init__(self, index):
+    super(Region, self).__init__()
+    self._current = None
+    self._minute  = timedelta(minutes=1)
+    self._index   = index
+    self._path    = path.join(__dir, "%s.png")
 
   def __contains__(self, item):
     raise NotImplementedError("Must be overridden in subclass")
@@ -81,17 +83,19 @@ class Region(TimeList):
     return self._current
 
   def generate(self):
-    out  = dict()
-    now  = datetime.now()
-    path = self._path + str(now)
-    data = self[now-self._minute:now]
-    del self[:now-self._minute]
+    out    = dict()
+    now    = datetime.now()
+    before = now-self._minute
+    path   = self._path % now
+    data   = self[before:now]
+    del self[:before]
     out["looks"] = len(data)
     out["time"]  = timedelta()
-    for delta in map(len, data):
-      time += delta
-    with open(, "w", encoding="utf-8") as fil:
+    for delta in data:
+      time += delta.len()
+    with open(path, "w", encoding="utf-8") as fil:
       json.dump(out, fil, indent=4, separators=(',', ': '))
+      replace(path, self._path % int(self._index))
 
 class Rectangle(Region):
   """This represents a rectangular region of interests."""
