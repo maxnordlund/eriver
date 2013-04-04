@@ -6,7 +6,7 @@ $(function() {
 	var Orb = function(x, y) {
 		this.x = x || -100;
 		this.y = y || 100;
-		this.scale = 0.3;
+		this.scale = 0.2;
 		
 		this.time = 300;
 		
@@ -30,10 +30,11 @@ $(function() {
 			$(this.dom).css('transform', 'translate('+this.x+'px,'+this.y+'px)');
 		},
 		moveTo : function(x, y) {
+			console.log("height: "+window.innerHeight+", width: "+window.innerWidth);
 			this.moveToPix(x * window.innerWidth, y * window.innerHeight);
 		},
 		contract : function() {
-			this.after.css('transform', 'scale(0.3)');
+			this.after.css('transform', 'scale(0.2)');
 		},
 		expand : function() {
 			this.after.css('transform', 'scale(1.0)');
@@ -266,7 +267,7 @@ $(function() {
 				orb.contract();
 				setTimeout(function() {
 					socket.emit('addPoint', point);
-				}, 400);
+				}, 1000);
 			}, 1000);
 		}
 	}

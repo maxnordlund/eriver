@@ -92,23 +92,6 @@ app.get "/stats/:num.json", (req, res) ->
         return
       res.sendfile resolvedPath
 
-###
-statusList = {}
-
-pushStatusUpdates = ->
-  console.log "Pushing status updates"
-
-
-io.of('/status').on 'connection', (socket) ->
-  socket.on 'connect', ->
-    statusList.push(socket)
-    socket.emit 'connect'
-  socket.on 'disconnect', ->
-    #statusList.splice statusList.indexOf(socket), 1
-    delete statusList[socket]
-    #console.log "deleted",socket,"from statusList","\n",statusList
-###
-
 io.of('/calibrate').on "connection", (socket) ->
   socket.on "name", (id) ->
     console.log "main: socket.on 'name'"
@@ -121,3 +104,22 @@ io.of('/calibrate').on "connection", (socket) ->
         socket.emit "unavailable"
     else
       socket.emit "unavailable"
+
+###
+statusSockets = {}
+
+pushStatusUpdates = ->
+  console.log "Pushing status updates"
+
+io.of('/status').on 'connection', (socket) ->
+  socket.on 'subscribe', ->
+    statusSockets[socket.id] = socket
+    #console.log 'new connection', statusSockets
+
+  socket.on 'disconnect', ->
+    delete statusSockets[socket.id]
+
+
+    MAKE COMMENTS
+    TAKE AWAY THIS OR FIX THIS, WATEVER??!
+###

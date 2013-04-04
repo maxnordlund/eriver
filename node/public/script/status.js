@@ -1,9 +1,11 @@
 $(function(){
-	//var socket = io.connect(location.protocol+'//'+location.host+'/status');
+  /*var socket = io.connect(location.protocol+'//'+location.host+'/status');
 
-  //socket.emit('connect')
+  window.socket = socket;
 
-  /*socket.on('update', function() {
+  socket.emit('subscribe'); // suscribing to news
+
+  socket.on('update', function() {
     location.reload();
   });*/
 });

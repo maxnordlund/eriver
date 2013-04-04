@@ -158,8 +158,8 @@ body {
 .orb {
 	position: fixed;
 	margin: -40px 0 0 -40px;
-	width: 80px;
-	height: 80px;
+	width: 60px;
+	height: 60px;
 	
 	transition: all 0.5s;
 	-webkit-transition: all 0.5s;
@@ -174,8 +174,8 @@ body {
 .orb div {
 	content: "";
 	position: absolute;
-	width: 80px;
-	height: 80px;
+	width: 60px;
+	height: 60px;
 	border-radius: 50%;
 	background-color: red;
 	background-image: radial-gradient(red, rgb(0, 50, 50));
