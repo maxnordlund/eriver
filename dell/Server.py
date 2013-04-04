@@ -173,7 +173,7 @@ class ConnHandler(Thread):
             else:
                 self.unavaliable()
 
-        self.server.eyetracker.clearCalibration(on_end)
+        self.server.eyetracker.endCalibration(on_end)
         
     def sendName(self):
         def on_name(name):
@@ -240,13 +240,13 @@ class ETServer(object):
         #Do not block. This leads to lost events when clients disconnect, but hey, better than having the server lag behind...
         
         if self.handlersLock.acquire(False):
-            self.logger.info("Locking handlers for sending")
+            #self.logger.info("Locking handlers for sending")
             for h in self.handlers:
                 #self.logger.debug(str(h) + str(h.listen))
                 if h.listen:
                     h.send(struct.pack("!B2dq", cmds.GETPOINT, etevent.x, etevent.y, etevent.timestamp)) #This might go bad if one handler blocks.
             self.handlersLock.release()
-            self.logger.info("Unlocking handlers for sending")
+            #self.logger.info("Unlocking handlers for sending")
 
     def start(self):
         lock = Lock() # For syncronization

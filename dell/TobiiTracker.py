@@ -180,13 +180,16 @@ class AnalyticsTracker(EyeTracker):
             callback(False, *args, **kwargs)
             return
 
-        def onComputationCompleted():
-            def on_endcalib(error, ever):
-                print(error)
-                print(ever)
+        def onComputationCompleted(error_comp, wat):
+            print("Calibration Calculation completed.")
+            def on_endcalib(error_end, ever):
+                print("End of Calibration")
+                if not error_end == 0: 
+                    print("Error: %s" % str(error_end))
+                    print(ever)
                 self.calibrating = False
                 callback(True, *args, **kwargs)
-            self.enqueue(self.et.StopCalibration,on_endcalib)
+            self.enqueue(self.et.StopCalibration, on_endcalib)
 
         self.logger.debug("Calling SDK's EndCalibration method")
         self.et.ComputeCalibration(onComputationCompleted)
