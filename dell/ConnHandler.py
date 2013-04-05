@@ -1,7 +1,7 @@
 from network import TCPHandler
 from socket import error
 import logging
-from threading import (Thread, Lock)
+from threading import Lock
 
 from MockTracker import MockTracker
 from TobiiTracker import AnalyticsTracker as TobiiTracker
@@ -15,12 +15,13 @@ def enum(**enums):
 cmds = enum(GETPOINT=1, STARTCAL=2, ADDPOINT=3, CLEAR=4, ENDCAL=5, UNAVALIABLE=6, NAME=7, FPS=8, FLASH_KLUDGE=60, OST=80, TEAPOT=90)
 lengths = enum(COMMAND=1, GETPOINT=24, STARTCAL=8, ADDPOINT=16, NAME=1, FLASH_KLUDGE=22, FPS=4, OST=4, TEAPOT=1)
 
-class ConnHandler(Thread):
+class ConnHandler():
     
     def __init__(self, conn, addr, et_constructor, name):
         global cmds
 
-        self.eyetracker = et_constructor(name=name)
+        self.tracker = et_constructor(name=name)
+        self.name = name
         self.logger = logging.getLogger("ConnHandler%s" % str(addr))
         self.conn = conn
         self.addr = addr
@@ -42,8 +43,6 @@ class ConnHandler(Thread):
 
             }#TODO Fill with functions for great justice.
 
-        Thread.__init__(self)
-
     def __hash__(self):
         return hash(self.addr)
 
@@ -51,10 +50,11 @@ class ConnHandler(Thread):
         return str(self.addr)
 
     def start(self):
+        self.logger.debug("Handler started!")
         self.enable_tracker()
+        self.tracker.register_onETEvent(self.sendData)
+        self.run()
         
-        thread = Thread.start(target=self.run)
-        thread.start()
 
     def run(self):
         global cmds
@@ -79,11 +79,7 @@ class ConnHandler(Thread):
     # Panic method.
     # If an error is found on the network, call this and let it handle it "gracefully".
     def panic(self, what="FAT"):
-        self.logger.error("O NOES! FRIEND %s DONT LEIK ME ANYMORE!\n\t IT SAID I WAS %s!" % (str(self), what))
-        try:
-            del self.server.handlers[self]
-        except KeyError:
-            self.logger.warning("Tried to delete client %s that did not exist" % str(self))
+        self.logger.error("O NOES! %s" % (str(self), what))
         self.stop = True
         
 
@@ -94,10 +90,10 @@ class ConnHandler(Thread):
             self.panic("Error on send of %s" % data)
 
     def sendData(self, etevent):
-        #self.logger.debug(str(h) + str(h.listen))
-        if h.listen:
+        self.logger.debug("Listening: %s" % self.listen)
+        if self.listen:
             #This might go bad if the handler blocks.
-            h.send(struct.pack("!B2dq", cmds.GETPOINT, etevent.x, etevent.y, etevent.timestamp))
+            self.send(struct.pack("!B2dq", cmds.GETPOINT, etevent.x, etevent.y, etevent.timestamp))
 
     def enable_tracker(self):
         lock = Lock() # For syncronization
@@ -109,7 +105,7 @@ class ConnHandler(Thread):
             lock.release()
 
         lock.acquire()
-        self.eyetracker.enable(blocking=True, callback=on_enable)
+        self.tracker.enable(blocking=True, callback=on_enable)
 
         lock.acquire()
 
@@ -126,15 +122,16 @@ class ConnHandler(Thread):
     def getPoint(self):
         global lengths
         try:
-            self.conn.recieve(lengths.GETPOINT)
+            data = self.conn.recieve(lengths.GETPOINT)
         except error:
             self.panic("Error on read of getPoint")
             return
         self.listen = not self.listen
+        self.logger.debug("GetPoint")
 
     def startCal(self):
         global lengths
-        self.logger.info("STARTCAL")
+        
         try:
             data = self.conn.recieve(lengths.STARTCAL)
         except error:
@@ -145,7 +142,7 @@ class ConnHandler(Thread):
             self.logger.error("Not correct length read for STARTCAL")
             return
         angle = struct.unpack("!d", data)[0]
-        self.logger.debug("Angle: %d" % angle)
+        
 
         def on_startcal(res):
             if res:
@@ -153,7 +150,8 @@ class ConnHandler(Thread):
             else:
                 self.unavaliable()
         
-        self.eyetracker.startCalibration(angle, on_startcal)
+        self.tracker.startCalibration(angle, on_startcal)
+        self.logger.debug("StartCalibration Angle: %d" % angle)
         
 
     def addPoint(self):
@@ -178,7 +176,8 @@ class ConnHandler(Thread):
             else:
                 self.unavaliable()
     
-        self.eyetracker.addPoint(point[0], point[1], on_addpoint)
+        self.tracker.addPoint(point[0], point[1], on_addpoint)
+        self.logger.debug("AddPoint x: %f; y: %f" % point)
 
     def clearCal(self):
         def on_clear(res):
@@ -187,7 +186,7 @@ class ConnHandler(Thread):
             else:
                 self.unavaliable()
 
-        self.eyetracker.clearCalibration(on_clear)
+        self.tracker.clearCalibration(on_clear)
 
     def endCal(self):
         def on_end(res):
@@ -196,13 +195,10 @@ class ConnHandler(Thread):
             else:
                 self.unavaliable()
 
-        self.eyetracker.endCalibration(on_end)
+        self.tracker.endCalibration(on_end)
         
     def sendName(self):
-        def on_name(name):
-            self.send(struct.pack("!2B", cmds.NAME, name))
-
-        self.eyetracker.getName(on_name)
+        self.send(struct.pack("!2B", cmds.NAME, self.name))
 
     def sendFPS(self):
         try:
@@ -218,7 +214,7 @@ class ConnHandler(Thread):
         def on_fps(fps):
             self.send(struct.pack("!Bf", cmds.FPS, fps))
 
-        self.eyetracker.getRate(on_fps)
+        self.tracker.getRate(on_fps)
 
     def sayCheese(self):
         try:

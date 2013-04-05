@@ -1,7 +1,12 @@
 from network import TCPHandler
 from socket import error
 import logging
-from threading import (Thread, Lock)
+from multiprocessing import Lock
+
+#from multiprocessing import Process as Routine
+from threading import Thread as Routine
+
+from ConnHandler import ConnHandler
 
 from MockTracker import MockTracker
 from TobiiTracker import AnalyticsTracker as TobiiTracker
@@ -22,13 +27,13 @@ class ETServer(object):
     def __init__(self, addr, tracker_constructor, name=0):
         self.shutdown = False # A way for any part of the server to give a shutdown signal
         self.handlers = set()# All the handlers of the server
-        self.eyetracker_constructor = tracker_constructor #We need a tracker aswell.
+        self.tracker_constructor = tracker_constructor #We need a tracker aswell.
         self.name = name
         self.tracker = self.tracker_constructor(name=self.name)
 
         #syncClock(tracker)
         
-        self.logger = logging.getLogger(name) # A logger is good to have
+        self.logger = logging.getLogger("EyeTracker%d" % name) # A logger is good to have
         self.serverSocket = TCPHandler(addr, None, True) # Create a server socket for listening to connection attempts
 
     def start(self):
@@ -41,25 +46,24 @@ class ETServer(object):
             lock.release()
 
         lock.acquire()
-        self.eyetracker.enable(blocking=True, callback=on_enable)
+        self.tracker.enable(blocking=True, callback=on_enable)
 
         lock.acquire()
                 
         def on_status(res):
             self.logger.debug("Status? %d" % res)
 
-        self.eyetracker.getState(on_status)
+        self.tracker.getState(on_status)
         
         with self.serverSocket: # Start listen and make sure it is closed!
             while not self.shutdown: #Loop until we recive signal of shutdown
                 try:
                     conn, addr = self.serverSocket.accept() #Blockingly accept connections
                     self.logger.info("\t\t\tFRIEND! AWSUM THX!")
-                    h = ConnHandler(conn, addr, self) #Take new connection and fork off a handler
-                    with self.handlersLock: #We do not want the iterator to be mad at us for modifying the dictionary during its run.
-                        self.handlers += [h] #Put it in set for safe storage.
                     
-                    h.start() #And kick it away!
+                    proc = Routine(target=windows_fork_workaround, args=(conn, addr, self.tracker_constructor, self.name)) #And kick it away!
+                    proc.start()
+                    self.handlers |= proc #Put it in set for safe storage.
                 except (error, KeyboardInterrupt) as e:
                     self.shutdown = True #O NOES!
                     for h in self.handlers:
@@ -73,7 +77,10 @@ class ETServer(object):
                 
 
         self.logger.info("\tPLZ CLOSE EVERYTHING!")
-        
+
+def windows_fork_workaround(conn, addr, et_constructor, name):
+    h = ConnHandler(conn, addr, et_constructor, name) #Take new connection and fork off a handler
+    h.start()
 
 if __name__ == "__main__":
 
@@ -124,13 +131,13 @@ if __name__ == "__main__":
         raise ValueError('Invalid tracker type.\n See the help text for more information.')
     
     try:
-        ETServer(addr, tracker).start()
+        ETServer(addr, tracker, name=options.name).start()
+        print("Server shutdown calmly")
 
     except:
-        logging.exception(exc_info=True)
-        
+        logging.exception("WHAT IS GOING ON?")
+	
     finally:
-        print("Stopped.")
         logging.info("KTHXBYE!")
         sys.exit(0)
 
