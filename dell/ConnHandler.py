@@ -74,12 +74,25 @@ class ConnHandler():
             command = struct.unpack("!B", data)[0]
             self.logger.info("Says %d" % (command))
             self.protocol.get(command, self.unavaliable)()
+        else:
+            self.logger.critical("Handler was stillborn.")
+
+        self.logger.info("Handler shutting down.")
+
+        
 
     
     # Panic method.
     # If an error is found on the network, call this and let it handle it "gracefully".
-    def panic(self, what="FAT"):
-        self.logger.error("O NOES! %s" % (str(self), what))
+    def panic(self, error=None):
+        if error:
+            self.logger.error("O NOES! %s" %  error)
+            
+        def on_disable(res):
+            if not res:
+                self.logger.critical("Can't disable tracker!")
+                
+        self.tracker.disable(on_disable)
         self.stop = True
         
 
@@ -90,7 +103,7 @@ class ConnHandler():
             self.panic("Error on send of %s" % data)
 
     def sendData(self, etevent):
-        self.logger.debug("Listening: %s" % self.listen)
+        #self.logger.debug("Listening: %s" % self.listen)
         if self.listen:
             #This might go bad if the handler blocks.
             self.send(struct.pack("!B2dq", cmds.GETPOINT, etevent.x, etevent.y, etevent.timestamp))
@@ -127,7 +140,7 @@ class ConnHandler():
             self.panic("Error on read of getPoint")
             return
         self.listen = not self.listen
-        self.logger.debug("GetPoint")
+        self.logger.debug("GetPoint: %s" % self.listen)
 
     def startCal(self):
         global lengths

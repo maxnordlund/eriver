@@ -63,7 +63,7 @@ class ETServer(object):
                     
                     proc = Routine(target=windows_fork_workaround, args=(conn, addr, self.tracker_constructor, self.name)) #And kick it away!
                     proc.start()
-                    self.handlers |= proc #Put it in set for safe storage.
+                    self.handlers |= set([proc]) #Put it in set for safe storage.
                 except (error, KeyboardInterrupt) as e:
                     self.shutdown = True #O NOES!
                     for h in self.handlers:
