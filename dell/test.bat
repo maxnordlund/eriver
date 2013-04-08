@@ -1,3 +1,2 @@
-start run.bat
-start cmd /c run_client.bat
+start run.bat mock
 start cmd /c run_client.bat

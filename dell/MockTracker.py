@@ -16,10 +16,9 @@ class MockTracker(EyeTracker):
         self.fps = fps
         
         proc = Thread(target=self.run)
-        
         proc.start()
 
-    def enable(self, callback, *args, **kwargs):
+    def enable(self, blocking, callback, *args, **kwargs):
         self.active = True
         callback(True, *args, **kwargs)
 
