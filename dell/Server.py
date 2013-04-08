@@ -2,7 +2,7 @@ from network import TCPHandler
 from socket import error
 import logging
 from threading import (Thread, Lock)
-from multiprocessing import (Process, Queue)
+#from multiprocessing import (Process, Queue)
 
 from ConnHandler import ConnHandler
 from MockTracker import MockTracker
@@ -19,6 +19,8 @@ def enum(**enums):
 
 tracker_types = enum(MOCK="MOCK", TOBII="TOBII")
 
+cmds = enum(GETPOINT=1, STARTCAL=2, ADDPOINT=3, CLEAR=4, ENDCAL=5, UNAVALIABLE=6, NAME=7, FPS=8, FLASH_KLUDGE=60, OST=80, TEAPOT=90)
+lengths = enum(COMMAND=1, GETPOINT=24, STARTCAL=8, ADDPOINT=16, NAME=1, FLASH_KLUDGE=22, FPS=4, OST=4, TEAPOT=1)
 
 class ConnHandler(Thread):
     
@@ -264,13 +266,7 @@ class ETServer(object):
 
         self.eyetracker.getState(on_status)
         
-        def QueueWorker(eyetracker, queue):
-            while 1:
-                command = queue.get()
-                eyetracker.__getattribute__(command.cmd)(*command.args, callback=callback)
-        
         with self.serverSocket: # Start listen and make sure it is closed!
-            cmds = Queue()
             while not self.shutdown: #Loop until we recive signal of shutdown
                 try:
                     conn, addr = self.serverSocket.accept() #Blockingly accept connections
