@@ -51,7 +51,7 @@ class TimeList(object):
 
   def __setitem__(self, key, value):
     node = Node(key, value)
-    self._list.append(node)
+    self._list.append(node) #TODO se till att de läggs till i ordning
     return node
 
   def __delitem__(self, key):
