@@ -8,9 +8,10 @@ $(function() {
 		this.y = y || 100;
 		this.scale = 0.2;
 		
+		this.moveTime = 500;
 		this.time = 300;
 		
-		var dom = $('<div>', {id: 'orb' + (OrbCount++)}).addClass('orb');
+		var dom = $('<div>', {id: 'orb' + (OrbCount++)}).addClass('orb').css('transition', 'all 0.5s');
 		var after = $('<div>').css('transition', 'all 0.3s');
 
 		dom.append(after);
@@ -30,7 +31,6 @@ $(function() {
 			$(this.dom).css('transform', 'translate('+this.x+'px,'+this.y+'px)');
 		},
 		moveTo : function(x, y) {
-			console.log("height: "+window.innerHeight+", width: "+window.innerWidth);
 			this.moveToPix(x * window.innerWidth, y * window.innerHeight);
 		},
 		contract : function() {
@@ -48,6 +48,12 @@ $(function() {
 		reset : function() {
 			this.hide();
 			this.moveTo(-0.1, 0.1);
+		},
+		flex : function() {
+			this.contract();
+			setTimeout(function() {
+				this.expand();
+			}, 50);
 		}
 	};
 	
@@ -204,7 +210,7 @@ $(function() {
 		orb.reset();
 
 		popup.content('reconnecting');
-
+		popup.hideSide();
 		timeouts.forEach(function(v) {
 			clearTimeout(v);
 		});
@@ -212,8 +218,8 @@ $(function() {
 
 	socket.on('getPoint', function(point) {
 		socket.emit('getPoint'); //end getPoint
+		orb.expand();
 		setTimeout(function() {
-			orb.expand();
 			orb.dom.hide();
 			popup.content('complete'); //$('#complete').show();
 			var err = Math.round(Math.sqrt(Math.pow((point.x - testPoint.x)*16/9, 2) + Math.pow(point.y - testPoint.y, 2))*window.innerHeight);
@@ -224,7 +230,7 @@ $(function() {
 				$('.errorRing').show();
 			}
 			$('.errortext').text(str);
-		},500);
+		},orb.moveTime);
 		
 	});
 
@@ -232,14 +238,14 @@ $(function() {
 		orb.expand();
 		setTimeout(function() {
 			updateOrb(_currPoints);
-		}, 500);
+		}, orb.moveTime);
 	});
 
 	socket.on('endCal', function() {
 		orb.contract();
 		setTimeout(function() {
 			socket.emit('getPoint'); //start getPoint
-		}, 500);
+		}, orb.moveTime);
 	});
 
 	$('#contents input[type="button"]').click(function(e) {
@@ -254,9 +260,10 @@ $(function() {
 	var updateOrb = function(list) {
 		if (list.length == 0) {
 			orb.moveTo(testPoint.x, testPoint.y);
+			socket.emit('endCal');
 			setTimeout(function() {
-				socket.emit('endCal');
-			}, 400);
+				//orb.flex();	
+			}, orb.moveTime);
 
 		} else {
 			point = _currPoints.shift();
@@ -267,12 +274,11 @@ $(function() {
 				orb.contract();
 				setTimeout(function() {
 					socket.emit('addPoint', point);
-				}, 1000);
-			}, 1000);
+				}, orb.moveTime);
+			}, orb.moveTime*2);
 		}
 	}
 
-	/* DEMO function, DELETE */
 	var calibrate = function() {
 		$(orb.dom).show();
 

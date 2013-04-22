@@ -11,22 +11,10 @@ html
     img(src='/img/eriver_logo.png', margin-top='10px')
     .availability
       h1 ET Status
-      - for (var i = 0; i < ets.length; i++) {
-        - et = ets[i]
-        - if (et.available && !et.cal && !et.paired) {
-          a.etStatus.available(href="/calibrate/#{i}#", id="#{i+1}")
-            .id #{et.id}
-            .ip #{et.ip}
-        - } else {
-          a.etStatus.unavailable(href="#", id="#{i+1}")
-            .id #{et.id}
-            - if (et.cal) {
-              .info Calibrating
-            - }
-            - else if (et.paired) {
-              .info In use
-            - }
-            .ip #{et.ip}
-        - }
+      - for (var i = 0; i < n; i++) {
+        a.etStatus.unavailable(href="#", id="#{i}")
+          .id ?
+          .info
+          .ip unknown
       - }
 

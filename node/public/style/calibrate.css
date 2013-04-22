@@ -160,10 +160,6 @@ body {
 	margin: -40px 0 0 -40px;
 	width: 60px;
 	height: 60px;
-	
-	transition: all 0.5s;
-	-webkit-transition: all 0.5s;
-	-moz-transition: all 0.5s;
 }
 
 .template {
@@ -236,16 +232,12 @@ body {
 	float: left;
 }
 
-.etStatus.available {
-}
-
 .etStatus.unavailable {
 	background-color: gray;
 	color: dim-gray;
 	cursor: default;
 }
 
-.etStatus.unavailable .info {
+.etStatus .info {
 	float: right;
-	color: maroon;
 }

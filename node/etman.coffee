@@ -1,7 +1,6 @@
 net = require "net"
 
 ###
-
 et = {
 	tcp: [object TCPSocket],
 	num: 1,
@@ -45,13 +44,16 @@ connectTo = (ip) ->
 	if port is undefined
 		port = "3031"
 
+	# New connection to ET
 	socket = net.connect port, host, () ->
 		console.log "Connection established to #{ip}"
 		socket.on 'data', dataHandler socket
+		do emitUpdate
 
+	# Disconnected ET
 	socket.on 'close', () ->
 		console.log "Connection to #{ip} closed, retrying..."
-		setTimeout (() -> connectTo ip), 10000
+		setTimeout (-> connectTo ip), 10000
 
 	socket.on 'error', () ->
 		return
@@ -93,6 +95,7 @@ dataHandler = (tcp) ->
 		tcp: tcp
 		id: -1
 		cal: false
+		calibrated: false
 		getting: false
 		socket: null
 
@@ -102,6 +105,7 @@ dataHandler = (tcp) ->
 			sObj.socket.emit 'unavailable'
 		else
 			console.log "E: No one to inform."
+		do emitUpdate
 
 	cmdOnly = false
 
@@ -126,6 +130,7 @@ dataHandler = (tcp) ->
 				sObj.cal = true
 				if sObj.socket?
 					sObj.socket.emit 'startCal', {}
+				do emitUpdate
 
 			when CMD.addPoint
 				x = data.readDoubleBE bytes(8)
@@ -144,6 +149,7 @@ dataHandler = (tcp) ->
 				sObj.cal = false
 				if sObj.socket?
 					sObj.socket.emit 'endCal'
+				do emitUpdate
 				
 			when CMD.unavailable
 				console.log "from TCP:", cmdList[cmd]
@@ -158,6 +164,7 @@ dataHandler = (tcp) ->
 					etList[id] = sObj
 				else
 					console.log "from TCP:", 'ET already exists.'
+				do emitUpdate
 
 			else
 				console.error "from TCP:", 'Error: Unknown data packet.'
@@ -167,11 +174,13 @@ pair = (num, socket) ->
 	if sObj? and sObj.socket is null
 		console.log "Pairing"
 		sObj.socket = socket
+		do emitUpdate
 
 		socket.on 'disconnect', ->
 			sObj.cal = false
 			sObj.getting = false
 			sObj.socket = null
+			do emitUpdate
 
 		socket.on "startCal", (data) ->
 			buf = new Buffer 9
@@ -185,6 +194,7 @@ pair = (num, socket) ->
 			buf.writeUInt8 CMD.endCal, 0
 			console.log "socket.io:", 'endCal'
 			sObj.tcp.write buf
+			sObj.calibrated = true
 
 		socket.on "getPoint", ->
 			bytes = do byteMemory
@@ -245,6 +255,52 @@ pair = (num, socket) ->
 
 log = console.log
 
+onUpdate = null
+
+onFunc = (str, func) ->
+	if str is "update"
+		onUpdate = func
+
+emitUpdate = ->
+	if onUpdate?
+		onUpdate(do statusList)
+
+statusList = ->
+	list = []
+	
+	for et in etList
+		if et?
+			info = ''
+			color = 'maroon'
+			available = true
+			if et.cal
+				info = 'Calibrating'
+				available = false
+			else if et.socket?
+				info = 'In use'
+				available = false
+			else if et.calibrated
+				info = 'Calibrated'
+				color = 'green'
+				
+			list.push
+				id: et.id
+				ip: et.tcp.remoteAddress
+				available: available
+				info: info
+				color: color
+		else
+			list.push
+				id: '?'
+				ip: 'unknown'
+				info: ''
+				color: 'black'
+				available: false
+	
+	return list
+
 exports.connect = establishConnections
 exports.pair = pair
 exports.get = get
+exports.on = onFunc
+exports.statusList = statusList

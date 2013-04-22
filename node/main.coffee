@@ -34,16 +34,16 @@ app.configure ->
         .use(nib())
 
 app.get "/", (req, res) ->
-  ets = ((etmanager.get id) for id in [0...config.ets.length])
-  #console.log ets
+  #ets = ((etmanager.get id) for id in [0...config.ets.length])
   res.render "status"
-    ets: ets
+    n: config.ets.length
+    #ets: ets
 
 app.get "/calibrate", (req, res) -> 
-  ets = ((etmanager.get id) for id in [0...config.ets.length])
-  #console.log ets
+  #ets = ((etmanager.get id) for id in [0...config.ets.length])
   res.render "status"
-    ets: ets
+    n: config.ets.length
+    #ets: ets
 
 app.get "/calibrate/:num", (req, res) ->
   num = req.params.num
@@ -105,21 +105,18 @@ io.of('/calibrate').on "connection", (socket) ->
     else
       socket.emit "unavailable"
 
-###
 statusSockets = {}
 
-pushStatusUpdates = ->
-  console.log "Pushing status updates"
+etmanager.on 'update', (data) ->
+  for i of statusSockets
+  	statusSockets[i].emit 'update', do etmanager.statusList
 
 io.of('/status').on 'connection', (socket) ->
   socket.on 'subscribe', ->
     statusSockets[socket.id] = socket
-    #console.log 'new connection', statusSockets
+    socket.emit 'subscribe'
+    socket.emit 'update', do etmanager.statusList
 
   socket.on 'disconnect', ->
     delete statusSockets[socket.id]
 
-
-    MAKE COMMENTS
-    TAKE AWAY THIS OR FIX THIS, WATEVER??!
-###
