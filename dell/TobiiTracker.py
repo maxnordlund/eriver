@@ -40,7 +40,7 @@ class AnalyticsTracker(EyeTracker):
 		super(AnalyticsTracker, self).__init__()
 		if logger==None:
 			FORMAT = '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
-			logging.basicConfig(level=logger.DEBUG, format=FORMAT)
+			#logging.basicConfig(level=logging.DEBUG, format=FORMAT)
 			self.logger = logging.Logger("TobiiTracker")
 		else:
 			self.logger = logger
@@ -231,13 +231,19 @@ class AnalyticsTracker(EyeTracker):
 	# callback is called with rates, *args and **kwargs when the operation is completed.
 	def getRates(self, callback, *args, **kwargs):
 		if self.et == None:
-			callback(set([0]), *args, **kwargs)
-			return
+		    callback(set([0]), *args, **kwargs)
+		    return
 		self.logger.debug("Calling SDK's EnumerateFramerates method")
 		self.et.EnumerateFramerates(callback, *args, **kwargs)
 
 	def getRate(self, callback, *args, **kwargs):
-		callback(0, *args, **kwargs)
+                def on_framerate(error, fps):
+                        if error == 0:
+                            callback(fps, *args, **kwargs)
+                        else:
+                            callback(0, *args, **kwargs)
+
+                GetFramerate(self, callback=on_framerate)
 
 	# Sets the tracker rate to the given value.
 	# The value given should be among those returned from getRates, excluding -1.
@@ -294,10 +300,10 @@ class AnalyticsTracker(EyeTracker):
 			# I have no idea of what to do here...
 			self.logger.info("UPDATE Event Handled")
 				
-	def onCalibrationStarted(self, error):
+	def onCalibrationStarted(self, error, wat):
 		self.calibrating = True
 			
-	def onCalibrationStopped(self, error):
+	def onCalibrationStopped(self, error, wat):
 		self.calibrating = False
 			
 	def register_event_handlers(self):

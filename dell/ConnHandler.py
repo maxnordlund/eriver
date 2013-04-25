@@ -214,17 +214,19 @@ class ConnHandler():
         self.send(struct.pack("!2B", cmds.NAME, self.name))
 
     def sendFPS(self):
+        #self.logger.debug("FPS!")
         try:
             data = self.conn.recieve(lengths.FPS)
         except error:
-            self.panic("Error on read of ost")
+            self.panic("Error on read of fps")
             return
 
         if not len(data) == lengths.FPS:
-            self.logger.error("Not correct length read for ADDPOINT")
+            self.logger.error("Not correct length read for FPS")
             return
         
         def on_fps(fps):
+            self.logger.debug("Sending FPS!")
             self.send(struct.pack("!Bf", cmds.FPS, fps))
 
         self.tracker.getRate(on_fps)
