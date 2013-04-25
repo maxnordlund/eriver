@@ -1,9 +1,5 @@
-import json
-from os import path, replace
 from datetime import datetime, timedelta
 from .TimeList import TimeList
-
-__dir = path.abspath(path.join(path.dirname(__file__), "..", "..", "statistics"))
 
 class TemporalNode(object):
   """This is a coordinate node for the Region class."""
@@ -18,36 +14,34 @@ class TemporalNode(object):
   def len(self):
     return self.end - self.begin if self.end is not datetime.max else 0
 
-  def __lt__(self, other):
-    return self.begin < other.timestamp
+  def __lt__(self, timestamp):
+    return self.begin < timestamp
 
-  def __le__(self, other):
-    return self.begin <= other.timestamp
+  def __le__(self, timestamp):
+    return self.begin <= timestamp
 
-  def __eq__(self, other):
-    return other.timestamp in self
+  def __eq__(self, timestamp):
+    return timestamp in self
 
-  def __ne__(self, other):
-    return other.timestamp not in self
+  def __ne__(self, timestamp):
+    return timestamp not in self
 
-  def __contains__(self, item):
-    return self.begin <= item.timestamp <= self.end
+  def __contains__(self, timestamp):
+    return self.begin <= timestamp <= self.end
 
-  def __gt__(self, other):
-    return self.end > other.timestamp
+  def __gt__(self, timestamp):
+    return self.end > timestamp
 
-  def __ge__(self, other):
-    return self.end >= other.timestamp
+  def __ge__(self, timestamp):
+    return self.end >= timestamp
 
 class Region(TimeList):
   """This represents a region of interests."""
 
-  def __init__(self, index):
+  def __init__(self):
     super(Region, self).__init__()
     self._current = None
     self._minute  = timedelta(minutes=1)
-    self._index   = index
-    self._path    = path.join(__dir, "%s.png")
 
   def __contains__(self, item):
     raise NotImplementedError("Must be overridden in subclass")
@@ -85,17 +79,14 @@ class Region(TimeList):
   def generate(self):
     out    = dict()
     now    = datetime.now()
-    before = now-self._minute
-    path   = self._path % now
+    before = now - self._minute
     data   = self[before:now]
     del self[:before]
     out["looks"] = len(data)
     out["time"]  = timedelta()
     for delta in data:
-      time += delta.len()
-    with open(path, "w", encoding="utf-8") as fil:
-      json.dump(out, fil, indent=4, separators=(',', ': '))
-      replace(path, self._path % int(self._index))
+      out["time"] += delta.len()
+    return out
 
 class Rectangle(Region):
   """This represents a rectangular region of interests."""
