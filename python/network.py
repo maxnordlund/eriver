@@ -27,7 +27,7 @@ class NetHandler(object):
      #With statement methods
      def __enter__(self):
           if self._listen:
-               self.socket.bind(address)
+               self.socket.bind(self.address)
                self.socket.listen(5)
 
      def __exit__(self, type, vale, traceback):
