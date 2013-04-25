@@ -14,7 +14,6 @@ html
       #main
         .logo
         #contents
-          //-(style='height: 0px')
           #connecting.template
             h2 Connecting to server.
             img(src='/img/ajax-loader.gif')
@@ -29,7 +28,7 @@ html
             h2 Prepare to calibrate.
             label
               | Angle:
-              input(type='number', value='0', id='angle')
+              input(type='number', value='15', id='angle')
               | deg
             input(type='button', value='Calibrate')
 
@@ -41,59 +40,6 @@ html
              | to the eRiver server.
           #complete.template
             h2 Calibration completed.
-            .errorRing
-            .errortext
+            #errorRing
+            #errortext
       #side
-  //-
-    #connecting.template
-      h2 Connecting to server.
-      img(src='/img/ajax-loader.gif')
-
-    #reconnecting.template
-      h2.error Reconnecting to server.
-      img(src='/img/ajax-loader.gif')
-
-    #none.template
-
-    #prepare.template
-      h2 Prepare to calibrate.
-      label
-        | Angle:
-        input(type='number', value='90', id='angle')
-        | deg
-      input(type='button', value='Calibrate')
-
-    #unavailable.template
-      h2.error Eye tracker unavailable.
-      p
-       | The eye tracker you have requested is not available.
-       | Please make sure that it is powered on and properly connected
-       | to the eRiver server.
-    img.template(src='/img/eriver_logo.png')
-  //-
-    #connecting.popup
-      .logo
-      h2 Connecting to server.
-      img(src='/img/ajax-loader.gif')
-    #prepare.popup(style='display: none;')
-      .logo
-      h2 Prepare to calibrate.
-      label
-        | Angle:
-        input(type='number', value='90', id='angle')
-        | deg
-      input(type='button', value='Calibrate')
-    #retry.popup(style='display: none;')
-      h2 Calibration failed.
-      input(type='button', value='Retry')
-    #complete.popup(style='display: none;')
-      h2 Calibration completed.
-      div(class='errorsize', style='display:none')
-      div(class='errortext')
-    #unavailable.popup(style='display: none;')
-      .logo
-      h2.error Eye tracker unavailable.
-      p
-       | The eye tracker you have requested is not available.
-       | Please make sure that it is powered on and properly connected
-       | to the eRiver server.

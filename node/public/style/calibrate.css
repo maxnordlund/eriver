@@ -113,13 +113,37 @@ body {
 	color: red;
 }
 
-.errorsize, .errorRing {
+#errorRing {
 	border-radius: 50%;
-	border: 1px solid;
+	border: 2px solid;
 	border-color: #066;
 	margin: 20px auto 10px auto;
 }
+/*
+#rings {
+	position: relative;
+	vertical-align: middle;
+	width: 300px;
+}
 
+#rings .okRing, #rings .errorRing {
+	display: inline-block;
+	border-radius: 50%;
+	border: 2px solid;
+	border-color: #00a;
+	margin: 0 auto;
+}
+
+#rings .okRing {
+	width: 100px;
+	height: 100px;
+}
+
+#rings .errorRing {
+
+	border-color: #066;
+}
+*/
 .popup label, #popup label {
 	display: block;
 }
@@ -173,10 +197,10 @@ body {
 	width: 60px;
 	height: 60px;
 	border-radius: 50%;
-	background-color: red;
-	background-image: radial-gradient(red, rgb(0, 50, 50));
-	background-image: -webkit-radial-gradient(red, rgb(0, 50, 50));
-	background-image: -moz-radial-gradient(red, rgb(0, 50, 50));
+	background-color: rgb(0, 255, 255);
+	background-image: radial-gradient(rgb(0, 255, 255), rgb(0, 50, 50));
+	background-image: -webkit-radial-gradient(rgb(0, 255, 255), rgb(0, 50, 50));
+	background-image: -moz-radial-gradient(rgb(0, 255, 255), rgb(0, 50, 50));
 	background-size: cover;
 }
 

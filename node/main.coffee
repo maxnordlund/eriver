@@ -79,7 +79,7 @@ app.get "/heatmap/:num.png", (req, res) ->
         return
       res.sendfile resolvedPath
 
-app.get "/stats/:num.json", (req, res) ->
+app.get "/statistics/:num.json", (req, res) ->
   num = req.params.num
   if config.heatmapPath.indexOf('/') is 0
     path = "#{config.statsPath}/#{num}.json"
