@@ -1,12 +1,12 @@
 import TimeList
 import random
-import datetime
+from datetime, timedelta import datetime
+
+def randList(n):
+  nu = datetime.now()
+  for i in range(n):
+    yield nu + timedelta(sec=randdom.randint)
+
+a = randList(20)
+
 tl = TimeList.TimeList()
-
-for i in range(20):
-  tl[datetime.datetime.now()] = (i,i)
-  #tl[random.randint(0,10)] = (i,i)
-  #print(tl) 
-
-for t in tl:
-  print(t)
