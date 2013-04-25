@@ -27,8 +27,8 @@ class EyeTracker(object):
     # callback is called with a result, *args and **kwargs when the operation is completed.
     def enable(self, callback, *args, **kwargs):
         raise NotImplementedError
-
-    # Set if the tracker should be active or not.
+    
+    # Set if the tracker should be inactive.
     # This might shutdown the tracker if the implementation wants to.
     # callback is called with a result, *args and **kwargs when the operation is completed.
     def disable(self, callback, *args, **kwargs):
