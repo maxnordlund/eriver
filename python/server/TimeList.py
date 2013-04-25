@@ -3,8 +3,7 @@ class Node(object):
 
   def __init__(self, timestamp, value):
     self.__slots__ = [ "x", "y", "timestamp" ]
-    self.x         = value.x
-    self.y         = value.y
+    self.x, self.y = value
     self.timestamp = timestamp
 
   def __lt__(self, other):
@@ -25,6 +24,8 @@ class Node(object):
   def __ge__(self, other):
     return self.timestamp >= other.timestamp
 
+  def __str__(self):
+    return "x = %d, y = %d, timestamp = %d"%(self.x,self.y,self.timestamp)
 class TimeList(object):
   """TimeList is a class in which you store coordinates by timestamp.
 
@@ -38,12 +39,12 @@ class TimeList(object):
     return len(self._list)
 
   def _slice(self, key):
-    if type(key) is slice
+    if type(key) is slice:
       start = self.index(key.start) if key.start is not None else None
       stop  = self.index(key.stop) if key.stop is not None else None
       step  = self.index(key.step) if key.step is not None else None
       return slice(start, stop, step)
-    else
+    else:
       return self.index(key)
 
   def __getitem__(self, key):
@@ -51,8 +52,8 @@ class TimeList(object):
 
   def __setitem__(self, key, value):
     node = Node(key, value)
-    index = index(self, value)
-    self._list.insert(index, node) 
+    idx = self.index(node)
+    self._list.insert(idx, node) 
     return node
 
   def __delitem__(self, key):
@@ -61,11 +62,15 @@ class TimeList(object):
   def index(self, value, start=0, stop=None):
     stop    = len(self) - 1 if stop is None else stop
     middle  = (stop+start)//2
-    element = self._left[middle]
+    if(len(self._list)==0):
+	    return 0 
+    #print("middle: ", middle, " len(self): ", len(self), " len(self.list) ", len(self._list))
+    element = self._list[middle]
     if element == value:
       return middle
     elif start == stop:
-      raise ValueError("%s is not in list" % str(value))
+      #raise ValueError("%s is not in list" % str(value))
+      return middle
     elif element > value:
       return self.index(value, start, middle - 1)
     elif element < value:
