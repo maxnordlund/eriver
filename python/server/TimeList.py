@@ -78,7 +78,7 @@ class TimeList(object):
       #raise ValueError("%s is not in list" % str(key))
       return middle
     elif element > key:
-      return self.index(key, start, middle - 1)
+      return self.index(key, start, middle)
     elif element < key:
       return self.index(key, middle + 1, stop)
     else:
