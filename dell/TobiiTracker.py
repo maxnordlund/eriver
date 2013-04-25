@@ -40,8 +40,7 @@ class AnalyticsTracker(EyeTracker):
         super(AnalyticsTracker, self).__init__()
         if logger==None:
             FORMAT = '%(asctime)s - %(levelname)s - %(name)s - %(message)s'
-            logging.basicConfig(level=logger.DEBUG, format=FORMAT)
-            print("WHAT?")
+            #logging.basicConfig(level=logging.DEBUG, format=FORMAT)
             self.logger = logging.Logger("TobiiTracker")
         else:
             self.logger = logger
@@ -119,37 +118,27 @@ class AnalyticsTracker(EyeTracker):
     # Other than that, implementations may do what ever they feel fitting.
     # callback is called with the status, *args and **kwargs.
     def getState(self, callback, *args, **kwargs):
-        self.enqueue(callback, 1, *args, **kwargs) # Kludge
-        return
+        #self.enqueue(callback, 1, *args, **kwargs) # Kludge
+        #return
+        
+        status = 999
         
         if self.et == None:
-            print("-1")
-            callback(-1, *args, **kwargs)
-            return
+            status = 998
 
-        print("WHAT?")
         if (self.enabled and self.calibrating):
-            print("3")
-            callback(3, *args, **kwargs)
-            return
+            status = 3
         
         if (not self.enabled) and self.calibrating:
-            print("2")
-            callback(2, *args, **kwargs)
-            return
+            status = 2
 
         if self.enabled and (not self.calibrating):
-            print("1")
-            callback(1, *args, **kwargs)
-            return
+            status = 1
 
         if (not self.enabled) and (not self.calibrating):
-            print("0")
-            callback(0, *args, **kwargs)
-            return
+            status = 0
 
-        print("-2")
-        callback(-2, *args, **kwargs)
+        callback(status, *args, **kwargs)
             
 
     # Puts the tracker in calibration mode.
@@ -166,8 +155,8 @@ class AnalyticsTracker(EyeTracker):
         #self.et.StopTracking()
         self.logger.debug("Calling SDK's StartCalibration method")
         def on_startcalib(error, ever):
-            print(error)
-            print(ever)
+            if not error == 0:
+                self.logger.error("Error in on_startcalib: %x" % error)
             self.calibrating = True
             callback(True, *args, **kwargs)
         self.et.StartCalibration(on_startcalib) 
@@ -180,19 +169,19 @@ class AnalyticsTracker(EyeTracker):
             callback(False, *args, **kwargs)
             return
 
-        def onComputationCompleted(error_comp, wat):
-            print("Calibration Calculation completed.")
+        def on_computation_completed(error_comp, wat):
+            if not error == 0:
+                self.logger.error("Error in on_computation_completed: %x" % error)
+                    
             def on_endcalib(error_end, ever):
-                print("End of Calibration")
-                if not error_end == 0: 
-                    print("Error: %s" % str(error_end))
-                    print(ever)
+                if not error == 0:
+                    self.logger.error("Error in on_endcalib: %x" % error_end)
                 self.calibrating = False
                 callback(True, *args, **kwargs)
             self.enqueue(self.et.StopCalibration, on_endcalib)
 
         self.logger.debug("Calling SDK's EndCalibration method")
-        self.et.ComputeCalibration(onComputationCompleted)
+        self.et.ComputeCalibration(on_computation_completed)
 
     # Clears any calibration actions done.
     # Restore the tracker to a state equal to that
@@ -204,8 +193,8 @@ class AnalyticsTracker(EyeTracker):
             return
 
         def on_clear(error, ever):
-            print(error)
-            print(ever)
+            if not error == 0:
+                self.logger.error("Error in on_clear: %x" % error)
             callback(True, *args, **kwargs)
             
         self.logger.debug("Calling SDK's ClearCalibration method")
@@ -223,8 +212,8 @@ class AnalyticsTracker(EyeTracker):
             return
 
         def on_add(error, ever):
-            print(error)
-            print(ever)
+            if not error == 0:
+                self.logger.error("Error in on_add: %x" % error)
             callback(True, *args, **kwargs)
 
         self.logger.debug("Calling SDK's AddCalibrationPoint method")
@@ -248,7 +237,13 @@ class AnalyticsTracker(EyeTracker):
         self.et.EnumerateFramerates(callback, *args, **kwargs)
 
     def getRate(self, callback, *args, **kwargs):
-        callback(0, *args, **kwargs)
+                def on_framerate(error, fps):
+                        if error == 0:
+                            callback(fps, *args, **kwargs)
+                        else:
+                            callback(0, *args, **kwargs)
+
+                GetFramerate(self, callback=on_framerate)
 
     # Sets the tracker rate to the given value.
     # The value given should be among those returned from getRates, excluding -1.
@@ -265,7 +260,7 @@ class AnalyticsTracker(EyeTracker):
         #I should write this soon.
         #print(event_type)
         #print(event_name)
-        print("%s: %s" % (str(event_name), str(et_info)))
+        self.logger.info("%s: %s" % (str(event_name), str(et_info)))
         if event_type == tobii.eye_tracking_io.browsing.EyetrackerBrowser.FOUND:
             
             def setTracker(error, eyetracker, eyetracker_info):
@@ -277,14 +272,16 @@ class AnalyticsTracker(EyeTracker):
                     
                 self.et = eyetracker
                 self.etid = str(eyetracker_info)
-                self.et.events.OnGazeDataReceived += self.henshin
+                
+                self.register_event_handlers()
+                
                 self.calibrating = False
                 if self.enabled:
                     def on_reenable(res):
-                        print("Re-enabled tracker: %s" % str(res))
+                        self.logger.debug("Re-enabled tracker: %s" % str(res))
                     
                     self.enable(True, on_reenable)
-                print("Tracker created!")
+                self.logger.debug("Tracker created!")
                      
             if (not self.etid == None) and self.etid == str(et_info):
                 
@@ -292,18 +289,28 @@ class AnalyticsTracker(EyeTracker):
             else:
                 self.etid = str(et_info)
                 tobii.eye_tracking_io.eyetracker.Eyetracker.create_async(self.mainloop, et_info, lambda error, eyetracker: self.enqueue(setTracker, error, eyetracker, et_info))
-            print("FOUND Event Handled")
+            self.logger.info("FOUND Event Handled")
         
         if event_type == tobii.eye_tracking_io.browsing.EyetrackerBrowser.REMOVED:
             if str(et_info) == self.etid:
                 self.et = None
-            print("REMOVED Event Handled")
+            self.logger.info("REMOVED Event Handled")
         
         if event_type == tobii.eye_tracking_io.browsing.EyetrackerBrowser.UPDATED:
             # I have no idea of what to do here...
-            print("UPDATE Event Handled")
+            self.logger.info("UPDATE Event Handled")
+                
+    def onCalibrationStarted(self, error, wat):
+        self.calibrating = True
             
-
+    def onCalibrationStopped(self, error, wat):
+        self.calibrating = False
+            
+    def register_event_handlers(self):
+        self.et.events.OnGazeDataReceived += self.henshin
+        self.et.events.OnCalibrationStarted += self.onCalibrationStarted
+        self.et.events.OnCalibrationStopped += self.onCalibrationStarted
+                
     def connect(self):
         browser = tobii.eye_tracking_io.browsing.EyetrackerBrowser(self.mainloop, self.etlooker)
         
@@ -321,7 +328,7 @@ class AnalyticsTracker(EyeTracker):
 
     def henshin(self, error, gdi):
         if not error == 0:
-            print("Errorcode: %d" % error)
+            self.logger.error("Error found in onGazeDataRecieved: %x" % error)
         else:
             #print("Got Data for transformation!")
             #print("Left")
@@ -344,4 +351,3 @@ class AnalyticsTracker(EyeTracker):
             etevent = ETEvent(x, y, timestamp)
             #print(str(etevent))
             self.callETEvent(etevent)
-    
