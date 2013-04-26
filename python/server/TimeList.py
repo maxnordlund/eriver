@@ -26,8 +26,14 @@ class Node(object):
   def __ge__(self, other):
     return self.timestamp >= other
 
+  def __repr__(self):
+    return "TimeList.Node(%s, (%d, %d))" % self.timestamp, self.x, self.y
+
+  def __sub__(self, other):
+    return self.timestamp - other.timestamp
+
   def __str__(self):
-    return "x = %d, y = %d, timestamp = %s" % (self.x, self.y, self.timestamp)
+    return "x = %d, y = %d, timestamp = %s" % self.x, self.y, self.timestamp
 
 class TimeList(object):
   """TimeList is a class in which you store coordinates by timestamp.
