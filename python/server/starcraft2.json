@@ -1,38 +1,36 @@
-"16:9":{
-  "minimap":{
+"16:9": {
+  "minimap": {
     "type": "rect",
     "top": 0.71,
     "right": 0.19,
     "bottom": 1.0,
-    "left": 0.00,
-  }
+    "left": 0.00
+  },
   
-  "resources":{
+  "resources": {
     "type": "rect",
     "top": 0.0,
     "right": 1.0,
     "bottom": 0.08,
-    "left": 0.75,
+    "left": 0.75
   }
-// Måste tänka igenom ordentligt hur vi gör med de nedre två så de blir rätt
-// tänk på att det är svarta rutor i kanterna på skärmen och hur det ser
-// ut på streamen mm.
-"16:10":{
-  "minimap":{
+},
+"16:10": {
+  "minimap": {
     "type": "rect",
     "top": 0.70,
     "right": 0.19,
     "bottom": 1.0,
-    "left": 0.00,
-  }
+    "left": 0.00
+  },
   
-  "resources":{//TODO här och framåt
+  "resources": {
     "type": "rect",
     "top": 0.0,
     "right": 1.0,
     "bottom": 0.08,
-    "left": 0.75,
+    "left": 0.75
   }
- "4:3"{
-  //TODO
-}
+},
+ "4:3": {
+ }
