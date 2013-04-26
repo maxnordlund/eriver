@@ -1,6 +1,6 @@
 class Handler(asyncore.dispatcher_with_send):
   """This is a handler for a single player."""
-      #TODO skriv om eller skriv klart här!
+  #TODO skriv om eller skriv klart här!
   def __init__(self, index, config):
     super(Handler, self).__init__(self)
     self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
