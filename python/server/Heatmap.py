@@ -64,6 +64,7 @@ class Heatmap(TimeList):
     with open(path, "wb") as fil:
       image.save(fil, "png")
       rename(path, self._path % int(self._index))
+    print("Heatmap Done!")
 
   def _walk(self, heat):
     for x in range(self._width):
