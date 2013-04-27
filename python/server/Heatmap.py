@@ -21,8 +21,7 @@ class Heatmap(TimeList):
   def generate(self):
     #heat    = [[0 for x in range(self._width)] for y in range(self._height)]
     heat    = [[0 for y in range(self._height)] for x in range(self._width)]
-    
-    print "Height %d, Width %d"%(len(heat[0]),len(heat))
+    print "Started generation.. pls w8"
     maximum = 1
     buf     = bytearray()
     now     = datetime.now()
@@ -51,7 +50,7 @@ class Heatmap(TimeList):
     for _,_,element in self._walk(heat):
       maximum = max(maximum, element)
     
-    """
+    """   
     # Max stuffs
     for element in self._walk(heat):
       buf.extend(self._color + (int(255 * element / maximum),))
@@ -65,8 +64,8 @@ class Heatmap(TimeList):
     for x, y, element in self._walk(heat):
       #print self._color + (int(255*element/maximum),)
       canvas[x,y] = self._color + (int(255 * element / maximum),)
-    del canvas #TODO maybe clean up 
-    
+    del canvas 
+        
     print("Saving Heatmap")
     with open(path, "wb") as fil:
       image.save(fil, "png")
