@@ -7,7 +7,7 @@ command line arguments:
   ratio,  e.g 16:9
   path,   e.g ./
   ip,     e.g 10.76.155.133
-  post,   e.g 4041
+  post,   e.g 3031
 
 """
 import json
