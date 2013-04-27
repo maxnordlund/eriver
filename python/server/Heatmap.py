@@ -21,16 +21,21 @@ class Heatmap(TimeList):
   def generate(self):
     #heat    = [[0 for x in range(self._width)] for y in range(self._height)]
     heat    = [[0 for y in range(self._height)] for x in range(self._width)]
+    
+    print "Height %d, Width %d"%(len(heat[0]),len(heat))
     maximum = 1
     buf     = bytearray()
     now     = datetime.now()
     before  = now - self._duration
     path    = self._path % now
+    if(len(self)>0):
+      print "before %s, first %s"%(before,self._list[0].timestamp)
     data    = self[before:now]
     limit_radius  = 25
     center  = 50.0 # Constant that wont affect the results
     pow_var = 0.5
     del self[:before]
+    #TODO check i>3, j>3
     for point in data:
       cx = int(point.x * self._width) 
       cy = int(point.y * self._height)
@@ -46,7 +51,7 @@ class Heatmap(TimeList):
     for _,_,element in self._walk(heat):
       maximum = max(maximum, element)
     
-    """   
+    """
     # Max stuffs
     for element in self._walk(heat):
       buf.extend(self._color + (int(255 * element / maximum),))
@@ -58,9 +63,11 @@ class Heatmap(TimeList):
     image = Image.new("RGBA",(self._width,self._height))
     canvas = image.load()
     for x, y, element in self._walk(heat):
+      #print self._color + (int(255*element/maximum),)
       canvas[x,y] = self._color + (int(255 * element / maximum),)
-    del canvas 
-        
+    del canvas #TODO maybe clean up 
+    
+    print("Saving Heatmap")
     with open(path, "wb") as fil:
       image.save(fil, "png")
       rename(path, self._path % int(self._index))

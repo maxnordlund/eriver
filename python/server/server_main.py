@@ -64,7 +64,6 @@ if __name__ == "__main__":
   addr  = (ip,port)
   """
   
-  
   while True:
     try:
       cmd = raw_input(">> ").split(" ")
