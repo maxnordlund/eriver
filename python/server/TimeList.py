@@ -2,9 +2,10 @@ from datetime import datetime
 
 class Node(object):
   """This is a coordinate node for the TimeList class."""
+  
+  __slots__ = ( "x", "y", "timestamp" )
 
   def __init__(self, timestamp, value):
-    self.__slots__ = [ "x", "y", "timestamp" ]
     self.x, self.y = value
     self.timestamp = timestamp
 
