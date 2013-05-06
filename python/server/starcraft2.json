@@ -13,22 +13,6 @@
     "right": 1.0,
     "bottom": 0.08,
     "left": 0.75
-  },
-
-  "test":{
-    "type": "rect",
-    "top": 0.0,
-    "right": 0.5,
-    "bottom": 1.0,
-    "left":0.0
-  },
-  
-  "test2":{
-    "type": "rect",
-    "top": 0.0,
-    "right": 1.0,
-    "bottom": 0.5,
-    "left":0.0
   }
 
 },
