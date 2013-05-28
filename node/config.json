@@ -1,0 +1,10 @@
+{
+  "heatmapPath" : "heatmaps",
+  "statsPath" : "stats",
+  "ets" : [
+    "10.76.255.40",
+    "10.76.255.41",
+    "localhost"
+  ],
+  "port" : 3000
+}

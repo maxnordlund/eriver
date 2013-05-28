@@ -1,0 +1,20 @@
+!!! 5
+html
+  head
+    meta(name='charset', content='utf-8')
+    title ET Status
+    link(href='/style/calibrate.css', rel='stylesheet', type='text/css')
+    script(src='/socket.io/socket.io.js')
+    script(src='/script/jquery.min.js')
+    script(src='/script/status.js')
+  body
+    img(src='/img/eriver_logo.png', margin-top='10px')
+    .availability
+      h1 ET Status
+      - for (var i = 0; i < n; i++) {
+        a.etStatus.unavailable(href="#", id="#{i}")
+          .id ?
+          .info
+          .ip unknown
+      - }
+

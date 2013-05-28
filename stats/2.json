@@ -1,0 +1,15 @@
+{
+  "player": "ThorZaIN",
+  "areas": [
+    {
+      "region": "minimap",
+      "looks": 56,
+      "time": 0.32
+    },
+    {
+      "region": "resources",
+      "looks": 30,
+      "time": 0.7
+    }
+  ]
+}

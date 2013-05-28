@@ -1,0 +1,267 @@
+@font-face {
+  font-family: 'Iceland';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Iceland'), local('Iceland-Regular'), url(/style/iceland.woff) format('woff');
+}
+
+body {
+	background-color: black;
+	margin: 0;
+	height: 100%;
+	font-family: "Iceland","Tahoma","Verdana","Arial","sans-serif";
+
+	text-align: center;
+
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	cursor: default;
+}
+
+.popup, #popup {
+	margin: 65px auto 0 auto;
+	background-color: white;
+	text-align: center;
+	border: 1px solid #555;
+
+	transition: all 1s;
+	-webkit-transition: all 1s;
+	-moz-transition: all 1s;
+}
+
+.popup {
+	width: 300px;
+}
+
+#popup {
+	position: relative;
+	display: inline-block;
+	background-color: white;
+	clear: both;
+}
+
+#main {
+	float: left;
+	padding-bottom: 15px;
+	height: 100%;
+	border-right: 1px gray solid;
+
+	transition: all 1s;
+	-webkit-transition: all 1s;
+	-webkit-transition: height 1s;
+}
+
+#contents {
+	width: 300px;
+	overflow: hidden;
+	display: inline-block;
+
+	transition: all 0.25s;
+	-webkit-transition: all 0.25s;
+	-moz-transition: all 0.25s;
+}
+
+#contents > div {
+	width: 300px;
+}
+
+#side {
+	float: right;
+  /*
+  background-color: green;
+	*/
+  background-position: center right;
+  background-repeat: no-repeat;
+
+  height: 100%;
+  overflow: hidden;
+  -webkit-transition: width 1s;
+}
+
+#status.popup {
+	width: 500px;
+}
+
+.popup div.logo, #popup .logo {
+	width: 100%;
+	height: 100px;
+	background-color: #ccc;
+	border-bottom: 1px solid #999;
+
+	margin-bottom: 15px;
+
+	background-image: url(/img/eriver_logo.png);
+	background-position: bottom;
+	background-repeat: no-repeat;
+}
+
+.popup h2, #popup h2 {
+	margin: 10px 0 20px 0;
+	font-weight: normal;
+	font-size: 30px;
+	color: #555;
+}
+
+.popup h2.error, #popup h2.error {
+	margin: 10px 0 20px 0;
+	font-weight: normal;
+	font-size: 30px;
+	color: red;
+}
+
+#errorRing {
+	border-radius: 50%;
+	border: 2px solid;
+	border-color: #066;
+	margin: 20px auto 10px auto;
+}
+/*
+#rings {
+	position: relative;
+	vertical-align: middle;
+	width: 300px;
+}
+
+#rings .okRing, #rings .errorRing {
+	display: inline-block;
+	border-radius: 50%;
+	border: 2px solid;
+	border-color: #00a;
+	margin: 0 auto;
+}
+
+#rings .okRing {
+	width: 100px;
+	height: 100px;
+}
+
+#rings .errorRing {
+
+	border-color: #066;
+}
+*/
+.popup label, #popup label {
+	display: block;
+}
+
+.popup input[type="number"], #popup input[type="number"] {
+	margin: 0 0 20px 10px;
+	width: 40px;
+}
+
+.popup input[type="button"], #popup input[type="button"] {
+	background-color: #088;
+	color: white;
+	font-family: "Iceland","Tahoma","Verdana","Arial","sans-serif";
+	padding: 5px 15px;
+	font-size: 24px;
+	box-shadow: 0 -1px 0 #066;
+
+	border-radius: 2px;
+	border: 1px solid white;
+	outline: 1.5px solid #088;
+}
+
+:focus {
+	outline: none;
+}
+
+.popup input[type="button"]:hover, #popup input[type="button"]:hover {
+	background-color: #099;
+	outline: 1.5px solid #099;
+}
+
+.popup input[type="button"]:active, #popup input[type="button"]:active {
+	background-color: #033;
+}
+
+.orb {
+	position: fixed;
+	margin: -40px 0 0 -40px;
+	width: 60px;
+	height: 60px;
+}
+
+.template {
+	display: none;
+	width: 300px;
+}
+
+.orb div {
+	content: "";
+	position: absolute;
+	width: 60px;
+	height: 60px;
+	border-radius: 50%;
+	background-color: rgb(0, 255, 255);
+	background-image: radial-gradient(rgb(0, 255, 255), rgb(0, 50, 50));
+	background-image: -webkit-radial-gradient(rgb(0, 255, 255), rgb(0, 50, 50));
+	background-image: -moz-radial-gradient(rgb(0, 255, 255), rgb(0, 50, 50));
+	background-size: cover;
+}
+
+.orb div.davido {
+	background-color: transparent;
+	background-image: url(/img/davido.png);
+}
+
+.orb div.andreaso {
+	background-color: transparent;
+	background-image: url(/img/andreaso.png);
+}
+
+#unavailable {
+	width: 400px;
+}
+
+.availability {
+	text-align: center;
+	margin-top: 50px;
+}
+
+.availability h1 {
+	color: white;
+}
+
+.etStatus {
+	display: block;
+	padding: 15px;
+	width: 300px;
+	top: 200px;
+	margin: 15px auto 0 auto;
+	background-color: white;
+	text-align: center;
+	text-decoration: none;
+	border: 1px solid #555;
+	color: black;
+	clear: both;
+
+	transition: all 0.1s;
+	-webkit-transition: all 0.1s;
+	-moz-transition: all 0.1s;
+}
+
+.etStatus:hover {
+	-webkit-transform: scale(1.1);
+	-moz-transform: scale(1.1);
+	transform: scale(1.1);
+}
+
+.etStatus .id {
+	width: 20px;
+	float: left;
+}
+
+.etStatus.unavailable {
+	background-color: gray;
+	color: dim-gray;
+	cursor: default;
+}
+
+.etStatus .info {
+	float: right;
+}
