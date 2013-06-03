@@ -13,6 +13,14 @@
       "right": 0.27,
       "bottom": 1.00,
       "left": 0.18
+    },
+
+    "unitdescription": {
+      "type": "rect",
+      "top": 0.62,
+      "right": 1.00,
+      "bottom": 1.00,
+      "left": 0.75
     }
   }
 }

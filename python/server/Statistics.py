@@ -31,8 +31,8 @@ class Statistics(object):
   def generate(self):
     out = dict()
     now = datetime.now()
-    file_path = self._path % now
-    for name, region in self._regions:
+    file_path = (self._path + "-id%s") % (now, int(self._index))
+    for name, region in self._regions.iteritems():
       out[name] = region.generate()
     with open(path, "w", encoding="utf-8") as fil:
       json.dump(out, fil, indent=4, separators=(',', ': '))
