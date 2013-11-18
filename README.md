@@ -25,19 +25,20 @@ x. name
    -- y: {float64}  
    -- time: {int64}
 
-* startCal  
+2. startCal  
    -- angle: {float64}
 
-* addPoint  
+3. endCal
+
+4. clear
+
+5. addPoint  
    -- x: {float64} 
    -- y: {float64}
-* clear
 
-* endCal
+6. unavailable
 
-* unavailable
-
-* name  
+7. name  
    -- id: {uint8}
 
 cmd is an unsigned byte (0-255)
