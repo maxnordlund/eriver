@@ -7,7 +7,7 @@ command line arguments:
   ratio,  e.g 16:9
   path,   e.g ./
   ip,     e.g 10.76.155.133
-  post,   e.g 4041
+  port,   e.g 3031
 
 """
 import json
@@ -64,7 +64,6 @@ if __name__ == "__main__":
   addr  = (ip,port)
   """
   
-  
   while True:
     try:
       cmd = raw_input(">> ").split(" ")
@@ -75,4 +74,3 @@ if __name__ == "__main__":
     else:
       if(cmd[0] in commands):
         commands[cmd[0]](cmd[1:])
-  

@@ -21,16 +21,20 @@ class Heatmap(TimeList):
   def generate(self):
     #heat    = [[0 for x in range(self._width)] for y in range(self._height)]
     heat    = [[0 for y in range(self._height)] for x in range(self._width)]
+    print "Started generation.. pls w8"
     maximum = 1
     buf     = bytearray()
     now     = datetime.now()
     before  = now - self._duration
     path    = self._path % now
+    if(len(self)>0):
+      print "before %s, first %s"%(before,self._list[0].timestamp)
     data    = self[before:now]
     limit_radius  = 25
     center  = 50.0 # Constant that wont affect the results
     pow_var = 0.5
     del self[:before]
+    #TODO check i>3, j>3
     for point in data:
       cx = int(point.x * self._width) 
       cy = int(point.y * self._height)
@@ -58,27 +62,17 @@ class Heatmap(TimeList):
     image = Image.new("RGBA",(self._width,self._height))
     canvas = image.load()
     for x, y, element in self._walk(heat):
+      #print self._color + (int(255*element/maximum),)
       canvas[x,y] = self._color + (int(255 * element / maximum),)
     del canvas 
         
+    print("Saving Heatmap")
     with open(path, "wb") as fil:
       image.save(fil, "png")
       rename(path, self._path % int(self._index))
+    print("Heatmap Done!")
 
   def _walk(self, heat):
     for x in range(self._width):
       for y in range(self._height):
         yield x, y, heat[x][y]
-
-# def concat(array):
-#   tmp = list()
-#   for arr in array:
-#     tmp += arr
-#   return tmp
-
-# def gen(width=128, height=64):
-#   data = bytearray()
-#   for x in range(width):
-#     for y in range(height):
-#       data.extend([random.randrange(255) for _ in range(4)])
-#   return Image.frombuffer("RGBA", (width, height), buffer(data), "raw", "RGBA", 0, 1)

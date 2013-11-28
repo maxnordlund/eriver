@@ -1,0 +1,52 @@
+"16:9": {
+  "minimap": {
+    "type": "rect",
+    "top": 0.71,
+    "right": 0.19,
+    "bottom": 1.0,
+    "left": 0.00
+  },
+  
+  "resources": {
+    "type": "rect",
+    "top": 0.0,
+    "right": 1.0,
+    "bottom": 0.08,
+    "left": 0.75
+  }
+
+},
+"16:10": {
+  "minimap": {
+    "type": "rect",
+    "top": 0.70,
+    "right": 0.19,
+    "bottom": 1.0,
+    "left": 0.00
+  },
+  
+  "resources": {
+    "type": "rect",
+    "top": 0.0,
+    "right": 1.0,
+    "bottom": 0.08,
+    "left": 0.74
+  }
+},
+ "4:3": {
+  "minimap": {
+    "type": "rect",
+    "top": 0.71,
+    "right": 0.23,
+    "bottom": 1.0,
+    "left": 0.00
+  },
+  
+  "resources": {
+    "type": "rect",
+    "top": 0.0,
+    "right": 1.0,
+    "bottom": 0.05,
+    "left": 0.66
+  }
+ }

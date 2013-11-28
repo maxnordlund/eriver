@@ -1,0 +1,19 @@
+Statistics server
+=================
+
+Gather eye tracking data by starting 
+server_main.py with command line arguments:
+  
+  index,  e.g 1
+  game,   e.g starcraft2, portal2 or coh
+  ratio,  e.g 16:9
+  path,   e.g ./
+  ip,     e.g 10.76.155.133
+  post,   e.g 3031
+
+Example
+=======
+
+python server_main.py 1 coh 16:9 ./ 10.76.155.133 3031
+
+
