@@ -1,7 +1,7 @@
 from os import path, rename
 from datetime import datetime, timedelta
 from TimeList import TimeList
-import Image
+from PIL import Image
 import math
 
 _dir = path.abspath(path.join(path.dirname(__file__), "..", "..", "heatmaps"))
