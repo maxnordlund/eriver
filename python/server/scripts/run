@@ -1,0 +1,12 @@
+#!/bin/bash
+INDEX=$1
+IP=$2
+PORT=$3
+GAME=$4
+RATIO=$5
+PATH=$6
+: ${GAME:="starcraft2"}
+: ${RATIO:="16:9"}
+: ${PATH:="./"}
+echo "python server_main.py $INDEX $GAME $RATIO $PATH $IP $PORT"
+/usr/bin/python server_main.py $INDEX $GAME $RATIO $PATH $IP $PORT

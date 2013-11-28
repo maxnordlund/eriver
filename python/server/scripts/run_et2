@@ -1,0 +1,11 @@
+#!/bin/bash
+# Start a starcraft 2 statistics generator for et 2
+INDEX="2"
+IP="et2.bream.io"
+PORT="3031"
+GAME="starcraft2"
+RATIO="16:9"
+PATH="./"
+
+echo "/usr/bin/python server_main.py $INDEX $GAME $RATIO $PATH $IP $PORT"
+/usr/bin/python server_main.py $INDEX $GAME $RATIO $PATH $IP $PORT
