@@ -62,7 +62,7 @@ get = (num) ->
 	if num > ipList.length or num < 0
 		return null
 
-	o =
+	object =
 		id: '?'
 		ip: 'unknown'
 		cal: false
@@ -71,14 +71,13 @@ get = (num) ->
 
 	if etList[num]?
 		et = etList[num]
-		o.id = et.id
-		o.ip = et.tcp.remoteAddress
-		o.cal = et.cal
-		o.available = true
-		o.paired = et.socket?
-		return o
-	else
-		return o
+		object.id = et.id
+		object.ip = et.tcp.remoteAddress
+		object.cal = et.cal
+		object.available = true
+		object.paired = et.socket?
+
+	return object
 
 # Function to remember indexing
 # Write number of wanted bytes,
@@ -86,9 +85,9 @@ get = (num) ->
 byteMemory = ->
 	i = 0
 	return (int) ->
-		tmp = i
+		returnIndex = i
 		i += int
-		return tmp
+		return returnIndex
 
 dataHandler = (tcp) ->
 	sObj =
@@ -138,24 +137,24 @@ dataHandler = (tcp) ->
 				console.log "from TCP:", cmdList[cmd], (x), (y)
 				if sObj.socket?
 					sObj.socket.emit 'addPoint', {x: x, y: y}
-				
+
 			when CMD.clear
 				console.log "from TCP:", cmdList[cmd]
 				if sObj.socket?
 					sObj.socket.emit 'clear'
-				
+
 			when CMD.endCal
 				console.log "from TCP:", cmdList[cmd]
 				sObj.cal = false
 				if sObj.socket?
 					sObj.socket.emit 'endCal'
 				do emitUpdate
-				
+
 			when CMD.unavailable
 				console.log "from TCP:", cmdList[cmd]
 				if sObj.socket?
 					sObj.socket.emit 'unavailable'
-				
+
 			when CMD.name
 				id = data.readUInt8 bytes(1)
 				console.log "from TCP:", cmdList[cmd], (id)
@@ -253,8 +252,6 @@ pair = (num, socket) ->
 		console.log "socket.io:", "No such ET, or already paired..."
 		return false
 
-log = console.log
-
 onUpdate = null
 
 onFunc = (str, func) ->
@@ -267,7 +264,7 @@ emitUpdate = ->
 
 statusList = ->
 	list = []
-	
+
 	for et in etList
 		if et?
 			info = ''
@@ -282,7 +279,7 @@ statusList = ->
 			else if et.calibrated
 				info = 'Calibrated'
 				color = 'green'
-				
+
 			list.push
 				id: et.id
 				ip: et.tcp.remoteAddress
@@ -296,7 +293,7 @@ statusList = ->
 				info: ''
 				color: 'black'
 				available: false
-	
+
 	return list
 
 exports.connect = establishConnections

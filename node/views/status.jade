@@ -11,7 +11,7 @@ html
     img(src='/img/eriver_logo.png', margin-top='10px')
     .availability
       h1 ET Status
-      - for (var i = 0; i < n; i++) {
+      - for (var i = 1; i <= n; i++) {
         a.etStatus.unavailable(href="#", id="#{i}")
           .id ?
           .info

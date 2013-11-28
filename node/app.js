@@ -1,3 +1,3 @@
 require("coffee-script");
 
-module.exports = exports =require("./main");
+module.exports = exports = require("./main");

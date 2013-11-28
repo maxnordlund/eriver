@@ -1,8 +1,8 @@
 express = require "express"
 stylus = require "stylus"
 socketio = require "socket.io"
-etmanager = require "./etman.coffee"
-config = require "./config.json"
+etmanager = require "./etman"
+config = require "./config"
 fs = require "fs"
 nib = require "nib"
 
@@ -10,7 +10,7 @@ app = do express
 
 port = config.port
 
-server = app.listen port, -> 
+server = app.listen port, ->
   console.log process.cwd() # Current execution directory
   console.log "Listening on #{port}"
 
@@ -35,13 +35,13 @@ app.configure ->
 
 app.get "/", (req, res) ->
   #ets = ((etmanager.get id) for id in [0...config.ets.length])
-  res.render "status"
+  res.render "status",
     n: config.ets.length
     #ets: ets
 
-app.get "/calibrate", (req, res) -> 
+app.get "/calibrate", (req, res) ->
   #ets = ((etmanager.get id) for id in [0...config.ets.length])
-  res.render "status"
+  res.render "status",
     n: config.ets.length
     #ets: ets
 
@@ -51,54 +51,42 @@ app.get "/calibrate/:num", (req, res) ->
   if et? && et.available
     if et.cal
       res.render "unavailable",
-        et
     else
       res.render "calibrate",
-        et
   else if et?
     et.id = num
     res.render "unavailable",
-      et
   else
     et =
       id: num,
       cal: false
     res.render "unavailable",
-      et
+  return et
 
-app.get "/heatmap/:num.png", (req, res) ->
+safeSendFile = (type) -> (req, res) ->
   num = req.params.num
-  if config.heatmapPath.indexOf('/') is 0
-    path = "#{config.heatmapPath}/#{num}.png"
+  if config[type].indexOf('/') is 0
+    path = "#{config[type]}/#{num}.png"
     res.sendfile path
   else
-    path = "../#{config.heatmapPath}/#{num}.png"
+    path = "../#{config[type]}/#{num}.png"
     fs.realpath path, pathCache, (err, resolvedPath) ->
       if err?
-        console.log err
-        return
-      res.sendfile resolvedPath
+        console.error err
+        res.send 500, err.stack
+      else
+        res.sendfile resolvedPath
 
-app.get "/statistics/:num.json", (req, res) ->
-  num = req.params.num
-  if config.heatmapPath.indexOf('/') is 0
-    path = "#{config.statsPath}/#{num}.json"
-    res.sendfile path
-  else
-    path = "../#{config.statsPath}/#{num}.json"
-    fs.realpath path, pathCache, (err, resolvedPath) ->
-      if err?
-        console.log err
-        return
-      res.sendfile resolvedPath
+app.get "/heatmap/:num.png", safeSendFile "heatmapPath"
+
+app.get "/statistics/:num.json", safeSendFile "statsPath"
 
 io.of('/calibrate').on "connection", (socket) ->
   socket.on "name", (id) ->
     console.log "main: socket.on 'name'"
-    et = etmanager.get id
-    if et?
-      success = etmanager.pair id, socket
-      if success
+    if etmanager.get(id)?
+      if etmanager.pair id, socket
+        # success
         socket.emit "name", id
       else
         socket.emit "unavailable"

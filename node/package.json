@@ -1,9 +1,9 @@
 {
-  "name": "Bream", 
+  "name": "Bream",
   "version": "0.1.0",
   "private": true,
-  "main": "app",
-  "author": "Hyper Bream (http://www.tobii.com)",
+  "main": "app.js",
+  "author": "Bream IO (http://bream.io)",
   "contributors": [
     "Andreas Broström   <abros@kth.se>",
     "Johan Fogelström   <johfog@kth.se>",
@@ -17,15 +17,13 @@
     "Philip Bratt       <bratt.philip@gmail.com>"
   ],
   "dependencies": {
-    "coffee-script": "1.4.x",
-    "jade": "0.28.x",
-    "stylus": "0.32.x",
-    "nib": "0.9.x",
-    "connect": "2.7.x",
-    "connect-assets": "2.3.x",
-    "express": "3.0.x",
-    "express-jquery": "1.8.x",
-    "fibrous": "0.2.x",
+    "coffee-script": "1.6.x",
+    "jade": "0.35.x",
+    "stylus": "0.40.x",
+    "nib": "1.0.x",
+    "connect": "2.11.x",
+    "connect-assets": "2.5.x",
+    "express": "3.4.x",
     "socket.io": "0.9.x"
   },
   "devDependencies": {
@@ -33,9 +31,7 @@
     "express-error": "0.0.x"
   },
   "scripts": {
-    "prestart": ". shim.sh --enable",
     "preinstall": "./preinstall.sh",
-    "poststart": ". shim.sh --disable",
     "start": "nodemon"
   }
 }

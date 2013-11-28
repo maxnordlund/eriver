@@ -2,9 +2,8 @@
   "heatmapPath" : "heatmaps",
   "statsPath" : "stats",
   "ets" : [
-    "10.76.255.40",
-    "10.76.255.41",
-    "localhost"
+    "172.28.195.2",
+    "et1.bream.io"
   ],
   "port" : 3000
 }
