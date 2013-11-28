@@ -20,7 +20,8 @@ def debug(msg, isLogging):
 def _generate_stats(queue, index, game, ratio, path, isLogging):
   config = parse_JSON(os.path.join(path,"%s.json"%game))
   subconfig = config[ratio]
-  stats = Statistics(index, config[ratio], os.path.join(path,"statistics"))
+  #stats = Statistics(index, config[ratio], os.path.join(path,"statistics"))
+  stats = Statistics(index, config[ratio], os.path.join(path,"..","..","statistics"))
   
   while True:
     while not queue.empty():
@@ -45,7 +46,8 @@ def start_stats(queue, index, game, ratio, path, isLogging):
 def _generate_heatmap(queue, index, path, isLogging):
   config = parse_JSON(os.path.join(path,"heatmap.json"))
   #Get subconfig from heatmap according to args screen resolution TODO
-  heatmap = Heatmap(index, config, os.path.join(path,"heatmaps"))
+  #heatmap = Heatmap(index, config, os.path.join(path,"heatmaps"))
+  heatmap = Heatmap(index, config, os.path.join(path,"..","..","heatmaps"))
 
   while True:
     while not queue.empty():
