@@ -69,6 +69,7 @@ if __name__ == "__main__":
       cmd = raw_input(">> ").split(" ")
     except (KeyboardInterrupt, EOFError): 
       stop([])
+      print
       sys.exit(0)
 
     else:

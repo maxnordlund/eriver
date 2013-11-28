@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
-from .TimeList import TimeList
+from TimeList import TimeList
 
 class Region(TimeList):
   """This represents a region of interests."""
 
   def __init__(self):
-    super(Region, self).__init__()
-    self._minute = timedelta(minutes=1)
+    TimeList.__init__(self)
+    self._duration = timedelta(minutes=1)
 
   def __contains__(self, item):
     raise NotImplementedError("Must be overridden in subclass")
@@ -30,34 +30,6 @@ class Region(TimeList):
         current = None
 
     out["time"] = str(out["time"])
-    return out
-
-  def __setitem__(self, key, value):
-    if self._current is None and value in self:
-      self._current = TemporalNode(datetime.now(), value)
-      self._list.append(self._current)
-    elif self._current is not None and value not in self
-      self._current.end = datetime.now()
-      self._current = None
-    return self._current
-
-  def generate(self):
-    now    = datetime.now()
-    before = now - self._minute
-    data   = self[before:now]
-    del self[:before]
-    out = {
-      looks: 0
-      time: timedelta()
-    }
-    current = None
-    for node in data:
-      if current is None and node in self:
-        out["looks"] += 1
-        current = node
-      elif current is not None and node not in self:
-        out["time"] += node - current
-        current = None
     return out
 
 class Rectangle(Region):

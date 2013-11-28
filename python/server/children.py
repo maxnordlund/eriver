@@ -14,7 +14,7 @@ def parse_JSON(filename):
 
 def debug(msg, isLogging):
   if isLogging.value:
-    print msg + "\n>> "
+    sys.stdout.write("\n" + msg + "\n>> ")
 
 def _generate_stats(queue, index, game, ratio, path, isLogging):
   config = parse_JSON(os.path.join(path,"%s.json"%game))
@@ -67,8 +67,9 @@ def start_heatmap(queue, index, path, isLogging):
   return heatmap
 
 def _generate_match(queue, index, name, game, ratio, path, isRunning):
-  if not os.path.exists(path): 
-    os.mkdir(os.path.join(path, "matches", name))
+  dir_path = os.path.join(path, "matches", name)
+  if not os.path.exists(dir_path): 
+    os.mkdir(dir_path)
 
   heatmapConfig = parse_JSON(os.path.join(path,"heatmap.json"))
   heatmap = Heatmap(index, heatmapConfig, os.path.join(path, "matches", name))
@@ -186,17 +187,17 @@ class Match():
         self.flags[key].value = False
    
   def stop(self):
-    self.flags["matchRunning"].value = False
     print "Generating match content"
-    self.children["match"].join()
-    print "Done generating match content"
-      
+    self.flags["matchRunning"].value = False
+    match_child = self.children.pop("match")
+
     for child in self.children.itervalues():
       if child.is_alive(): 
         child.terminate()
 
-    print "I killed all the children"
-
+    match_child.join()
+    print "Done generating match content"
+      
 """
 def put_data_database(queue, index, db, isLogging):
   #BORK
