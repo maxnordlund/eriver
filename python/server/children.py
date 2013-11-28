@@ -15,6 +15,7 @@ def parse_JSON(filename):
 def debug(msg, isLogging):
   if isLogging.value:
     sys.stdout.write("\n" + msg + "\n>> ")
+    sys.stdout.flush()
 
 def _generate_stats(queue, index, game, ratio, path, isLogging):
   config = parse_JSON(os.path.join(path,"%s.json"%game))
