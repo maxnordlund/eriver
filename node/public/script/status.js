@@ -1,15 +1,15 @@
 $(function(){
   $("h1")[0].style.color = "grey";
   $("h1").text("No connection");
-  var socket = io.connect(location.protocol+'//'+location.host+'/status');
+  var socket = io.connect(location.protocol + "//" + location.host + "/status");
 
   window.socket = socket;
 
-  socket.emit('subscribe'); // subscribing to news
+  socket.emit("subscribe"); // subscribing to news
 
-  socket.on('update', function(data) {
-    console.log(data);
-    var element;
+  socket.on("update", function(data) {
+    console.log("update", data);
+    var element, index;
     for(index in data) {
       obj = data[index];
       element = $("#" + index);
@@ -17,10 +17,10 @@ $(function(){
       element.find(".info").text(obj.info).css("color", obj.color);
       element.find(".ip").text(obj.ip);
       if(obj.available) {
-        element.removeClass('unavailable');
+        element.removeClass("unavailable");
         element.attr("href", "/calibrate/" + obj.id + "#");
       } else {
-        element.addClass('unavailable');
+        element.addClass("unavailable");
         element.attr("href", "#");
       }
     }
@@ -68,7 +68,7 @@ $(function(){
     }*/
   });
 
-  socket.on('subscribe', function() {
+  socket.on("subscribe", function() {
     $("h1").text("ET Status");
     $("h1")[0].style.color = "white";
   });
