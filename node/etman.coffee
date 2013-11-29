@@ -17,9 +17,9 @@ etList = []
 CMD =
 	getPoint : 1
 	startCal : 2
-	addPoint : 3
+	endCal : 3
 	clear : 4
-	endCal : 5
+	addPoint : 5
 	unavailable : 6
 	name : 7
 
@@ -45,17 +45,17 @@ connectTo = (ip) ->
 		port = "3031"
 
 	# New connection to ET
-	socket = net.connect port, host, () ->
+	socket = net.connect port, host, ->
 		console.log "Connection established to #{ip}"
 		socket.on 'data', dataHandler socket
 		do emitUpdate
 
 	# Disconnected ET
-	socket.on 'close', () ->
+	socket.on 'close', ->
 		console.log "Connection to #{ip} closed, retrying..."
 		setTimeout (-> connectTo ip), 10000
 
-	socket.on 'error', () ->
+	socket.on 'error', ->
 		return
 
 get = (num) ->
@@ -179,12 +179,17 @@ pair = (num, socket) ->
 			sObj.cal = false
 			sObj.getting = false
 			sObj.socket = null
+			if sObj.cal
+				buf = new Buffer 1
+				buf.writeUInt8 CMD.endCal, 0
+				sObj.tcp.write buf
 			do emitUpdate
 
 		socket.on "startCal", (data) ->
+			bytes = do byteMemory
 			buf = new Buffer 9
-			buf.writeUInt8 CMD.startCal, 0
-			buf.writeDoubleBE data.angle, 1
+			buf.writeUInt8 CMD.startCal, bytes(1)
+			buf.writeDoubleBE data.angle, bytes(8)
 			console.log "socket.io:", 'startCal', data
 			sObj.tcp.write buf
 
@@ -213,11 +218,12 @@ pair = (num, socket) ->
 
 		socket.on "addPoint", (point) ->
 			console.log "socket.io:", "addPoint", point.x, point.y
+			bytes = do byteMemory
 
 			buf = new Buffer 17
-			buf.writeUInt8 CMD.addPoint, 0
-			buf.writeDoubleBE point.x, 1
-			buf.writeDoubleBE point.y, 9
+			buf.writeUInt8 CMD.addPoint, bytes(1)
+			buf.writeDoubleBE point.x, bytes(8)
+			buf.writeDoubleBE point.y, bytes(8)
 
 			console.log "socket.io:", 'addPoint', point
 
