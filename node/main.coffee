@@ -50,17 +50,17 @@ app.get "/calibrate/:num", (req, res) ->
   et = etmanager.get num
   if et? && et.available
     if et.cal
-      res.render "unavailable",
+      res.render "unavailable", et
     else
-      res.render "calibrate",
+      res.render "calibrate", et
   else if et?
     et.id = num
-    res.render "unavailable",
+    res.render "unavailable", et
   else
     et =
       id: num,
       cal: false
-    res.render "unavailable",
+    res.render "unavailable", et
   return et
 
 safeSendFile = (type, extention) -> (req, res) ->
