@@ -41,7 +41,7 @@ class Statistics(object):
     # Warp in dict
     wrapper_out = dict()
     wrapper_out["areas"] = out
-    wrapper_out["player"] = self._player_name
+    wrapper_out["name"] = self._player_name
     
     with open(file_path, "w") as fil:
       json.dump(wrapper_out, fil, indent=4, separators=(',', ': '))
