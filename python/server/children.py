@@ -17,11 +17,11 @@ def debug(msg, isLogging):
     sys.stdout.write("\n" + msg + "\n>> ")
     sys.stdout.flush()
 
-def _generate_stats(queue, index, game, ratio, path, isLogging):
+def _generate_stats(queue, index, player_name, game, ratio, path, isLogging):
   config = parse_JSON(os.path.join(path,"%s.json"%game))
   subconfig = config[ratio]
   #stats = Statistics(index, config[ratio], os.path.join(path,"statistics"))
-  stats = Statistics(index, config[ratio], os.path.join(path,"..","..","statistics"))
+  stats = Statistics(index, player_name, config[ratio], os.path.join(path,"..","..","statistics"))
   
   while True:
     while not queue.empty():
@@ -36,8 +36,8 @@ def _generate_stats(queue, index, game, ratio, path, isLogging):
     stats.generate()
     debug("Done stats generation", isLogging)
 
-def start_stats(queue, index, game, ratio, path, isLogging):
-  stats_args = (queue, index, game, ratio, path, isLogging)
+def start_stats(queue, index, player_name, game, ratio, path, isLogging):
+  stats_args = (queue, index, player_name, game, ratio, path, isLogging)
   stats = Process(target=_generate_stats, args=stats_args)
   stats.start()
 
@@ -69,19 +69,22 @@ def start_heatmap(queue, index, path, isLogging):
 
   return heatmap
 
-def _generate_match(queue, index, name, game, ratio, path, isRunning):
-  dir_path = os.path.join(path, "matches", name)
+def _generate_match(queue, index, player_name, game, ratio, path, isRunning):
+  if not os.path.exists(os.path.join(path, "..", "..", "matches")):
+    os.mkdir(os.path.join(path, "..", "..", "matches"))
+
+  dir_path = os.path.join(path, "..","..","matches", player_name)
   if not os.path.exists(dir_path): 
     os.mkdir(dir_path)
 
   heatmapConfig = parse_JSON(os.path.join(path,"heatmap.json"))
-  heatmap = Heatmap(index, heatmapConfig, os.path.join(path, "matches", name))
+  heatmap = Heatmap(index, heatmapConfig, dir_path)
 
   heatmap._duration = timedelta(weeks=52)
 
   statsConfig = parse_JSON(os.path.join(path,"%s.json"%game))
   subconfig = statsConfig[ratio]
-  stats = Statistics(index, statsConfig[ratio], os.path.join(path, "matches", name))
+  stats = Statistics(index, player_name, statsConfig[ratio], dir_path)
   
   for region in stats._regions.itervalues():
     region._duration = timedelta(weeks=52)
@@ -100,8 +103,8 @@ def _generate_match(queue, index, name, game, ratio, path, isRunning):
   stats.generate()
 
 
-def start_match(queue, index, name, game, ratio, path, isMatchRunning):
-  match_args = (queue, index, name, game, ratio, path, isMatchRunning)
+def start_match(queue, index, player_name, game, ratio, path, isMatchRunning):
+  match_args = (queue, index, player_name, game, ratio, path, isMatchRunning)
   match = Process(target=_generate_match, args=match_args)
   match.start()
 
@@ -135,7 +138,7 @@ def start_network(addr, queues, isLogging):
 
   return net_client
 
-def spawn(index, game, ratio, path, ip, port, name):
+def spawn(index, game, ratio, path, ip, port, player_name):
   #NOTE name
   index = int(index)
   port = int(port)
@@ -149,16 +152,16 @@ def spawn(index, game, ratio, path, ip, port, name):
   }
 
   children = {
-    "stats": start_stats(queues[0], index, game, ratio, path, flags["loggingStats"]),
+    "stats": start_stats(queues[0], index, player_name, game, ratio, path, flags["loggingStats"]),
     "heatmaps": start_heatmap(queues[1], index, path, flags["loggingHeatmap"]),
-    "match": start_match(queues[2], index, name, game, ratio, path, flags["matchRunning"]),
+    "match": start_match(queues[2], index, player_name, game, ratio, path, flags["matchRunning"]),
     "network": start_network(addr, queues, flags["loggingNet"])
   }
   
   return children, flags
 
 class Match():
-  def __init__(self,index, game, ratio, path, ip, port, name):
+  def __init__(self,index, game, ratio, path, ip, port, player_name):
     index = int(index)
     port = int(port)
     addr = (ip, port)
@@ -171,9 +174,9 @@ class Match():
     }
 
     self.children = {
-      "stats": start_stats(queues[0], index, game, ratio, path, self.flags["loggingStats"]),
+      "stats": start_stats(queues[0], index, player_name, game, ratio, path, self.flags["loggingStats"]),
       "heatmaps": start_heatmap(queues[1], index, path, self.flags["loggingHeatmap"]),
-      "match": start_match(queues[2], index, name, game, ratio, path, self.flags["matchRunning"]),
+      "match": start_match(queues[2], index, player_name, game, ratio, path, self.flags["matchRunning"]),
       "network": start_network(addr, queues, self.flags["loggingNet"])
     }
   

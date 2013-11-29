@@ -13,7 +13,7 @@ class Statistics(object):
   and statistics JSON for a single player.
   """
 
-  def __init__(self, index, config, dir_path=_dir):
+  def __init__(self, index, player_name, config, dir_path=_dir):
     object.__init__(self)
     self._regions = dict()
     for name, subconfig in config.iteritems():
@@ -24,6 +24,7 @@ class Statistics(object):
       else:
         raise ValueError("Unknown type in config: %s" % value["type"])
     self._index = index
+    self._player_name = player_name
     self._path  = path.join(dir_path, "%s.json")
 
   def __setitem__(self, key, value):
@@ -36,7 +37,12 @@ class Statistics(object):
     file_path = (self._path + "-id%s") % (now, int(self._index))
     for name, region in self._regions.iteritems():
       out[name] = region.generate()
+
+    # Warp in dict
+    wrapper_out = dict()
+    wrapper_out["areas"] = out
+    wrapper_out["player"] = self._player_name
     
     with open(file_path, "w") as fil:
-      json.dump(out, fil, indent=4, separators=(',', ': '))
+      json.dump(wrapper_out, fil, indent=4, separators=(',', ': '))
       rename(file_path, self._path % int(self._index))
