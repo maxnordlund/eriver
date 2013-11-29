@@ -16,4 +16,34 @@ Example
 
 python server_main.py 1 coh 16:9 ./ 10.76.155.133 3031
 
+Scripts
+=======
+There are two scripts ready to run StraCraft2 on et1.bream.io or et2.bream.io
+You must execute the scripts from the parent directory
+e.g. ./scripts/run_et1
 
+This will open a prompt with the following command structure:
+
+	>> [COMMAND][MODULE/NAME]
+
+COMMANDS
+	log [MODULE]
+	Will enable logging output from [MODULE] 
+	disable with nolog command
+
+	nolog [MODULE]
+	Disables the logging invoked by the log command
+
+	start [NAME]
+	Starts an eye-tracking session with [NAME] which starts gathering 
+	et-data and output statistics at ../../statistics and 
+	heatmaps at ../../heatmaps. Will continue to output data until 
+	commands stop or kill are invoked
+
+	stop
+	Is invoked without arguments and stops the current eye-tracking session.
+	Will create a summary of the statistics and heatmaps in 
+	../../matches/[NAME] specified in start command. 
+
+	kill
+	Same as stop.
