@@ -40,8 +40,17 @@ class Statistics(object):
 
     # Warp in dict
     wrapper_out = dict()
-    wrapper_out["areas"] = out
+
+    # NOTE Hotfix, DHW13 StarCraft2
+    players = self._player_name.split("__vs__")
+
+    if len(players) == 2:
+      wrapper_out["player"] = players[self._index-1] # index = 1 -> player[0]
+    else:
+      wrapper_out["player"] = ""
+
     wrapper_out["name"] = self._player_name
+    wrapper_out["areas"] = out
     
     with open(file_path, "w") as fil:
       json.dump(wrapper_out, fil, indent=4, separators=(',', ': '))
