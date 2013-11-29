@@ -218,7 +218,7 @@ $(function() {
 	// Once the ET is known, tell the user to prepare.
 	socket.on('name', function() {
 		popup.content('prepare');
-		popup.sideContent('/img/eriver_logo.png');
+		// popup.sideContent('/img/eriver_logo.png');
 	});
 
 	// Set the "Calibrate" button to initiate calibration.
