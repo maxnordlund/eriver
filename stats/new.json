@@ -1,0 +1,16 @@
+{
+    "name": "Oskar__vs__Johan",
+    "player": "Oskar",
+    "areas": {
+        "minimap": {
+            "timeBetweenLooks": 60.0,
+            "looks": 0,
+            "time": 0.0
+        },
+        "resources": {
+            "timeBetweenLooks": 60.0,
+            "looks": 0,
+            "time": 0.0
+        }
+    }
+}
