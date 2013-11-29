@@ -18,7 +18,8 @@ class Region(TimeList):
     del self[:before]
     out = {
       "looks": 0,
-      "time": timedelta()
+      "time": timedelta(),
+      "timeBetweenLooks": timedelta()
     }
     current = None
     for node in data:
@@ -28,8 +29,19 @@ class Region(TimeList):
       elif current is not None and node not in self:
         out["time"] += node - current
         current = None
+    
+    # Time between looks in region
+    out["timeBetweenLooks"] = (self._duration - out["time"])/(out["looks"]+1)
+    
+    #out["time"] = str(out["time"])
+    
+    float_seconds_time = out["time"].seconds + out["time"].microseconds/1.0e6
+    
+    float_seconds_tbl = out["timeBetweenLooks"].seconds + out["timeBetweenLooks"].microseconds/1.0e6
 
-    out["time"] = str(out["time"])
+    out["time"] = float_seconds_time
+    out["timeBetweenLooks"] = float_seconds_tbl
+
     return out
 
 class Rectangle(Region):
