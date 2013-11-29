@@ -63,13 +63,13 @@ app.get "/calibrate/:num", (req, res) ->
     res.render "unavailable",
   return et
 
-safeSendFile = (type) -> (req, res) ->
+safeSendFile = (type, extention) -> (req, res) ->
   num = req.params.num
   if config[type].indexOf('/') is 0
-    path = "#{config[type]}/#{num}.png"
+    path = "#{config[type]}/#{num}.#{extention}"
     res.sendfile path
   else
-    path = "../#{config[type]}/#{num}.png"
+    path = "../#{config[type]}/#{num}.#{extention}"
     fs.realpath path, pathCache, (err, resolvedPath) ->
       if err?
         console.error err
@@ -77,9 +77,9 @@ safeSendFile = (type) -> (req, res) ->
       else
         res.sendfile resolvedPath
 
-app.get "/heatmap/:num.png", safeSendFile "heatmapPath"
+app.get "/heatmap/:num.png", safeSendFile "heatmapPath", 'png'
 
-app.get "/statistics/:num.json", safeSendFile "statsPath"
+app.get "/statistics/:num.json", safeSendFile "statsPath", 'json'
 
 io.of('/calibrate').on "connection", (socket) ->
   socket.on "name", (id) ->
