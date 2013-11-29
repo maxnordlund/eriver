@@ -74,15 +74,9 @@ body {
 	-o-transition: all 0.25s;
 }
 
-#contents > div {
-	width: 300px;
-}
-
 #side {
 	float: right;
-  /*
-  background-color: green;
-	*/
+
   background-position: center right;
   background-repeat: no-repeat;
 
@@ -132,31 +126,7 @@ body {
 	border-color: #066;
 	margin: 20px auto 10px auto;
 }
-/*
-#rings {
-	position: relative;
-	vertical-align: middle;
-	width: 300px;
-}
 
-#rings .okRing, #rings .errorRing {
-	display: inline-block;
-	border-radius: 50%;
-	border: 2px solid;
-	border-color: #00a;
-	margin: 0 auto;
-}
-
-#rings .okRing {
-	width: 100px;
-	height: 100px;
-}
-
-#rings .errorRing {
-
-	border-color: #066;
-}
-*/
 .popup label, #popup label {
 	display: block;
 }
@@ -225,10 +195,6 @@ body {
 .orb .andreaso {
 	background-color: transparent;
 	background-image: url(/img/andreaso.png);
-}
-
-#unavailable {
-	width: 400px;
 }
 
 .availability {
