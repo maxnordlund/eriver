@@ -5,10 +5,13 @@
   src: local('Iceland'), local('Iceland-Regular'), url(/style/iceland.woff) format('woff');
 }
 
-body {
+html, body {
 	background-color: black;
 	margin: 0;
 	height: 100%;
+}
+
+body {
 	font-family: "Iceland","Tahoma","Verdana","Arial","sans-serif";
 
 	text-align: center;
@@ -27,6 +30,8 @@ body {
 	background-color: white;
 	text-align: center;
 	border: 1px solid #555;
+
+	/*max-height: 300px*/
 
 	transition: all 1s;
 	-webkit-transition: all 1s;
@@ -58,7 +63,8 @@ body {
 }
 
 #contents {
-	width: 300px;
+	width: 280px;
+	padding: 0 10px;
 	overflow: hidden;
 	display: inline-block;
 
@@ -95,13 +101,14 @@ body {
 .popup div.logo, #popup .logo {
 	width: 100%;
 	height: 100px;
-	background-color: #ccc;
+	background-color: #666;
 	border-bottom: 1px solid #999;
 
 	margin-bottom: 15px;
 
-	background-image: url(/img/eriver_logo.png);
-	background-position: bottom;
+	background-image: url(/img/logo1_wide.svg);
+	background-size: 80%;
+	background-position: center;
 	background-repeat: no-repeat;
 }
 
@@ -226,11 +233,24 @@ body {
 
 .availability {
 	text-align: center;
-	margin-top: 50px;
+	margin-top: 30px;
 }
 
 .availability h1 {
 	color: white;
+}
+
+.poweredBy::before {
+	content: "powered by";
+	color: white;
+}
+
+.poweredBy::after {
+	content: "";
+	background: url(/img/logo1_wide.svg) no-repeat center;
+	height: 80px;
+	display: block;
+	margin-top: -20px;
 }
 
 .etStatus {
@@ -272,4 +292,75 @@ body {
 
 .etStatus .info {
 	float: right;
+}
+
+#fullScreenPrompt {
+	position: absolute;
+	background-color: white;
+	width: 400px;
+	height: 300px;
+	left: calc(50% - 200px);
+	top: 65px;
+	z-index: 1000;
+}
+
+.keyboard-key {
+	position: relative;
+	margin: 0 auto;
+	width: 250px;
+	height: 170px;
+	background-color: #333;
+	color: white;
+	line-height: 170px;
+	font-size: 100px;
+	border-radius: 20px;
+	transition: top 0.1s;
+	-webkit-transition: top 0.1s;
+}
+
+.keyboard-key::after {
+	position: relative;
+	content: "";
+	display: block;
+
+	background-color: #444
+
+	background-image: -o-linear-gradient(left, #3a3a3a 0%, #444 10%, #444 90%, #3a3a3a 100%);
+	background-image: -moz-linear-gradient(left, #3a3a3a 0%, #444 10%, #444 90%, #3a3a3a 100%);
+	background-image: -webkit-linear-gradient(left, #3a3a3a 0%, #444 10%, #444 90%, #3a3a3a 100%);
+	background-image: -ms-linear-gradient(left, #3a3a3a 0%, #444 10%, #444 90%, #3a3a3a 100%);
+	background-image: linear-gradient(to left, #3a3a3a 0%, #444 10%, #444 90%, #3a3a3a 100%);
+
+	box-shadow: 0 0 20px black;
+
+	width: 250px;
+	height: 170px;
+	top: -150px;
+	border-radius: inherit;
+	z-index: -10;
+	transition: top 0.1s;
+	-webkit-transition: top 0.1s;
+}
+
+.keyboard-key:hover {
+	background-color: #444;
+}
+
+.keyboard-key:hover::after {
+	background-color: #555;
+
+	background-image: -o-linear-gradient(left, #4a4a4a 0%, #555 10%, #555 90%, #4a4a4a 100%);
+	background-image: -moz-linear-gradient(left, #4a4a4a 0%, #555 10%, #555 90%, #4a4a4a 100%);
+	background-image: -webkit-linear-gradient(left, #4a4a4a 0%, #555 10%, #555 90%, #4a4a4a 100%);
+	background-image: -ms-linear-gradient(left, #4a4a4a 0%, #555 10%, #555 90%, #4a4a4a 100%);
+	background-image: linear-gradient(to left, #4a4a4a 0%, #555 10%, #555 90%, #4a4a4a 100%);
+
+}
+
+.keyboard-key:active {
+	top: 10px;
+}
+
+.keyboard-key:active::after {
+	top: -160px;
 }
