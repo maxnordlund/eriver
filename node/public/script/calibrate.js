@@ -141,8 +141,7 @@ $(function() {
 				return this;
 			},
 			hide: function() {
-				this.hideSide();
-				popup.css('height', 0);
+				//this.hideSide();
 				setTimeout(function() {
 					popup.hide();
 				}, 300);
@@ -150,7 +149,6 @@ $(function() {
 			},
 			show: function() {
 				popup.show();
-				// popup.css('height', '100%');
 			}
 		};
 
