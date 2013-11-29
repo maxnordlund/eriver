@@ -1,12 +1,28 @@
 {
-  "player": "ThorZaIN",
+  "name": "A__vs__B",
+
+  "player": "A",
+
   "areas": {
     "minimap": {
       "looks": 56,
       "time": 0.32,
       "timeBetweenLooks": 1.1
     },
+
     "resources": {
+      "looks": 30,
+      "time": 0.7,
+      "timeBetweenLooks": 2
+    },
+
+    "units": {
+      "looks": 56,
+      "time": 0.32,
+      "timeBetweenLooks": 1.1
+    },
+
+    "commands": {
       "looks": 30,
       "time": 0.7,
       "timeBetweenLooks": 2
