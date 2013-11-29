@@ -17,9 +17,9 @@ etList = []
 CMD =
 	getPoint : 1
 	startCal : 2
-	endCal : 3
+	endCal : 5
 	clear : 4
-	addPoint : 5
+	addPoint : 3
 	unavailable : 6
 	name : 7
 
