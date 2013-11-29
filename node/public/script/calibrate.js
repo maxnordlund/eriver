@@ -105,11 +105,11 @@ $(function() {
 
 	// Dialog window and controls.
 	var popup = (function() {
-		var popup = $('#popup');
-		var contents = popup.find('#contents');
-		var side = popup.find('#side')
-		var curr = contents.find('#connecting').toggleClass('template');
-		var sideVisible = false;
+		var popup = $('#popup'),
+			contents = popup.find('#contents'),
+			side = popup.find('#side'),
+			curr = contents.find('#connecting').toggleClass('template'),
+			sideVisible = false;
 
 		var obj = {
 			content: function(string) {
@@ -141,11 +141,7 @@ $(function() {
 				return this;
 			},
 			hide: function() {
-				//this.hideSide();
-				setTimeout(function() {
-					popup.hide();
-				}, 300);
-
+				popup.hide();
 			},
 			show: function() {
 				popup.show();
