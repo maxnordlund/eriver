@@ -7,10 +7,10 @@ $(function() {
 		this.x = x || -100;
 		this.y = y || 100;
 		this.scale = 0.2;
-		
+
 		this.moveTime = 700;
 		this.time = 300;
-		
+
 		var dom = $('<div>', {id: 'orb' + (OrbCount++)})
 			.addClass('orb')
 			.css('transition', 'all ' + this.moveTime +'ms');
@@ -19,18 +19,18 @@ $(function() {
 
 		dom.append(after);
 		$(document.body).prepend(dom);
-		
+
 		this.dom = dom;
 		this.id = '#' + dom.id;
 		this.after = after;
 		this.moveToPix(this.x, this.y);
 	};
-	
+
 	Orb.prototype = {
 		moveToPix : function moveToPix(x, y) {
 			this.x = x;
 			this.y = y;
-			
+
 			$(this.dom).css('transform', 'translate('+this.x+'px,'+this.y+'px)');
 		},
 		moveTo : function moveTo(x, y) {
@@ -60,7 +60,7 @@ $(function() {
 			}, 50);
 		}
 	};
-	
+
 	/* Mock-Socket.io-socket */
 	// if (typeof window.io !== 'object') {
 	// 	function Socket() {
@@ -68,7 +68,7 @@ $(function() {
 	// 		this.cb = {};
 
 	// 		this.getting = false;
-			
+
 	// 		setTimeout(function() {
 	// 			if (typeof _this.cb['connect'] == 'function') {
 	// 				_this.cb['connect']();
@@ -76,7 +76,7 @@ $(function() {
 	// 		}, 3000);
 
 	// 	}
-		
+
 	// 	Socket.prototype = {
 	// 		emit: function(type, data) {
 	// 			if (typeof this.cb[type] === 'function') {
@@ -94,7 +94,7 @@ $(function() {
 	// 			this.cb[type] = func;
 	// 		}
 	// 	}
-		
+
 	// 	window.io = (function() {
 	// 		this.connect = function(addr) {
 	// 			return new Socket();
@@ -102,7 +102,7 @@ $(function() {
 	// 		return this;
 	// 	})();
 	// }
-	
+
 	// Dialog window and controls.
 	var popup = (function() {
 		var popup = $('#popup');
@@ -146,11 +146,11 @@ $(function() {
 				setTimeout(function() {
 					popup.hide();
 				}, 300);
-				
+
 			},
 			show: function() {
 				popup.show();
-				popup.css('height', '100%');
+				// popup.css('height', '100%');
 			}
 		};
 
@@ -270,7 +270,7 @@ $(function() {
 		}
 	}
 
-	// Once the server confirms the "addPoint", 
+	// Once the server confirms the "addPoint",
 	// the "updateOrb" is called, and the process continues.
 	socket.on('addPoint', function() {
 		orb.expand();
@@ -300,10 +300,10 @@ $(function() {
 			orb.dom.hide();
 			popup.content('complete'); //$('#complete').show();
 			var err = Math.round(Math.sqrt(Math.pow((point.x - testPoint.x)*16/9, 2) + Math.pow(point.y - testPoint.y, 2))*window.innerHeight);
-			
+
 			err = Math.min(err, 250);
 			$('#errorRing').css('width', err+'px').css('height', err+'px').show();
-			
+
 			if (err < 80) {
 				$('#errorRing').css('border-color', '#00cc66');
 				$('#errortext').text("Calibrated. Good to go.");
@@ -324,7 +324,7 @@ $(function() {
 		timeouts.forEach(function(v) {
 			clearTimeout(v);
 		});
-	});	
+	});
 
 	// If the connection was lost.
 	socket.on('disconnect', function() {
@@ -337,8 +337,45 @@ $(function() {
 		});
 	});
 
-	// Sets global variables. 
+	// Sets global variables.
 	window.orb = orb;
 	window.popup = popup;
 	window.socket = socket;
+
+	(function() {
+		var fullScreenPrompt = $('#fullScreenPrompt');
+		if (window.innerHeight < screen.height) {
+			$('#F11').click(function () {
+				setTimeout(window.toggleFullScreen, 200);
+			});
+			$(window).on("resize", function(event) {
+				if (window.innerHeight === screen.height) {
+					fullScreenPrompt.hide();
+				}
+			});
+		} else {
+			fullScreenPrompt.hide();
+		}
+	}());
+
+	window.toggleFullScreen = function toggleFullScreen() {
+		if (!document.fullscreenElement &&    // alternative standard method
+				!document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
+			if (document.documentElement.requestFullscreen) {
+				document.documentElement.requestFullscreen();
+			} else if (document.documentElement.mozRequestFullScreen) {
+				document.documentElement.mozRequestFullScreen();
+			} else if (document.documentElement.webkitRequestFullscreen) {
+				document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+			}
+		} else {
+			if (document.cancelFullScreen) {
+				document.cancelFullScreen();
+			} else if (document.mozCancelFullScreen) {
+				document.mozCancelFullScreen();
+			} else if (document.webkitCancelFullScreen) {
+				document.webkitCancelFullScreen();
+			}
+		}
+	};
 });
