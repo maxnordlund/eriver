@@ -10,7 +10,7 @@ $(function(){
     var element, index, obj;
     for(index in data) {
       obj = data[index];
-      element = $("#" + index);
+      element = $("#nr" + index);
       element.find(".id").text(obj.id);
       element.find(".info").text(obj.info).css("color", obj.color);
       element.find(".ip").text(obj.ip);

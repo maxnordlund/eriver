@@ -250,6 +250,14 @@ body {
 	float: left;
 }
 
+#nr1 {
+  background-color: lightblue;
+}
+
+#nr2 {
+  background-color: lightpink;
+}
+
 .etStatus.unavailable {
 	background-color: gray;
 	color: dim-gray;
