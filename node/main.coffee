@@ -39,6 +39,9 @@ app.get "/", (req, res) ->
     n: config.ets.length
     #ets: ets
 
+app.get "/admin", (req, res) ->
+  res.render "admin"
+
 app.get "/calibrate", (req, res) ->
   #ets = ((etmanager.get id) for id in [0...config.ets.length])
   res.render "status",
@@ -63,23 +66,37 @@ app.get "/calibrate/:num", (req, res) ->
     res.render "unavailable", et
   return et
 
-safeSendFile = (type, extention) -> (req, res) ->
+safeSendFile = (type, extension) -> (req, res) ->
   num = req.params.num
   if config[type].indexOf('/') is 0
     path = "#{config[type]}/#{num}.#{extention}"
     res.sendfile path
   else
-    path = "../#{config[type]}/#{num}.#{extention}"
+    path = "../#{config[type]}/#{num}.#{extension}"
     fs.realpath path, pathCache, (err, resolvedPath) ->
       if err?
         console.error err
-        res.send 500, err.stack
+        res.send 404, err.stack
       else
         res.sendfile resolvedPath
 
 app.get "/heatmap/:num.png", safeSendFile "heatmapPath", 'png'
 
 app.get "/statistics/:num.json", safeSendFile "statsPath", 'json'
+
+app.get "/match/:name/:id.:ext", (req, res) ->
+  id = req.params.id
+  extension = req.params.ext
+  match = req.params.name
+
+  path = "../matches/#{match}/#{id}.#{extension}"
+
+  fs.realpath path, pathCache, (err, resolvedPath) ->
+    if err?
+      console.error err
+      res.send 404, err.stack
+    else
+      res.sendfile resolvedPath
 
 io.of('/calibrate').on "connection", (socket) ->
   socket.on "name", (id) ->
@@ -108,3 +125,9 @@ io.of('/status').on 'connection', (socket) ->
   socket.on 'disconnect', ->
     delete statusSockets[socket.id]
 
+io.of('/admin').on 'connection', (socket) ->
+  socket.emit 'ok', do etmanager.statusList
+
+  socket.on 'test', (id) ->
+    etmanager.canGetData id, (bool) ->
+      socket.emit 'test', {id: id, canGet: bool}
