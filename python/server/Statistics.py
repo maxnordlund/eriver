@@ -50,7 +50,8 @@ class Statistics(object):
       match_round = players[1].split("__nr__") # playerB__nr__1
       if len(match_round) == 2:
         wrapper_out["round"] = match_round[1]
-        wrapper_out["player"] = match_round[0] # Second player name updated
+        if(self._index == 2):
+          wrapper_out["player"] = match_round[0] # Second player name updated
 
     else:
       wrapper_out["player"] = ""

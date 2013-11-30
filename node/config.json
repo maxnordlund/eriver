@@ -1,6 +1,6 @@
 {
   "heatmapPath" : "heatmaps",
-  "statsPath" : "stats",
+  "statsPath" : "statistics",
   "ets" : [
     "et1.bream.io",
     "et2.bream.io"

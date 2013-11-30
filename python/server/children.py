@@ -111,6 +111,7 @@ def start_match(queue, index, player_name, game, ratio, path, isMatchRunning):
   return match
 
 def _listen(addr, queues, isLogging):
+  #isLogging = True
     debug("Starting client on addr %s, and host %d"%(addr[0],addr[1]), isLogging)
     tcphandler = TCPHandler(addr,None,False)
     debug("Past tcp handler", isLogging)
