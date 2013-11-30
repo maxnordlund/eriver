@@ -46,9 +46,23 @@ class Statistics(object):
 
     if len(players) == 2:
       wrapper_out["player"] = players[self._index-1] # index = 1 -> player[0]
+      
+      match_round = players[1].split("__nr__") # playerB__nr__1
+      if len(match_round) == 2:
+        wrapper_out["round"] = match_round[1]
+        wrapper_out["player"] = match_round[0] # Second player name updated
+
     else:
       wrapper_out["player"] = ""
+      wrapper_out["round"] = ""
+    """ 
+    match_round = players[-1].split("__nr__")
 
+    if len(match_round) == 2:
+      wrapper_out["round"] = match_round[1]
+    else:
+      wrapper_out["round"] = ""
+    """
     wrapper_out["name"] = self._player_name
     wrapper_out["areas"] = out
     
