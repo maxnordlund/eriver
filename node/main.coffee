@@ -32,6 +32,10 @@ app.configure ->
         .set('filename', path)
       # .set('compress', true)
         .use(nib())
+  app.use (err, req, res, next) ->
+    console.error "A scary error:"
+    console.error err.stack 
+    res.send 500, "Error!!!"
 
 app.get "/", (req, res) ->
   #ets = ((etmanager.get id) for id in [0...config.ets.length])
