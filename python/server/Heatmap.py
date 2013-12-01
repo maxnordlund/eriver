@@ -47,7 +47,7 @@ class Heatmap(TimeList):
     image = Image.new("RGBA",(self._width,self._height))
     canvas = image.load()
     for x, y, element in self._walk(heat):
-      canvas[x,y] = self._color + (int(255 * element / maximum),)
+      canvas[x,y] = self._color + (int(255 * element / ((maximum+1)/1.5)),)
     del canvas 
         
     with open(path, "wb") as fil:
