@@ -31,6 +31,7 @@ class Region(TimeList):
         current = None
     
     # Time between looks in region
+    #FIXME BORK! If used with matches, it will produce corrupt data as duration is 52 weeks
     out["timeBetweenLooks"] = (self._duration - out["time"])/(out["looks"]+1)
     
     #out["time"] = str(out["time"])
